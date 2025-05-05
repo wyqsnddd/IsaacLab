@@ -1,0 +1,90 @@
+# Base image
+FROM isaac-lab-ros2 AS mc_rtc
+
+# Set the time zone directly by copying the respective zoneinfo file
+RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
+
+# Set the environment variable to non-interactive
+ENV DEBIAN_FRONTEND=noninteractive
+
+# install necessary packages:
+RUN apt-get update && apt-get install -y debconf-utils \
+    build-essential \
+    lsb-release \
+    git \
+    wget \
+    c++filt \
+    clang-format \
+    vim \
+    python3 \
+    python3-pip \
+    libssl-dev \
+    libffi-dev \
+    python3-dev \
+    libgeos-dev \
+    curl \
+    locate \
+    tree \
+    libboost-program-options-dev \
+    libboost-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+
+RUN apt-get remove -y cmake
+
+# Download and install a newer version of CMake (e.g., 3.22.0)
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0-linux-x86_64.sh \
+    && chmod +x cmake-3.22.0-linux-x86_64.sh \
+    && ./cmake-3.22.0-linux-x86_64.sh --skip-license --prefix=/usr/local \
+    && rm cmake-3.22.0-linux-x86_64.sh
+
+# Verify CMake installation
+RUN cmake --version
+
+# Install additional Python packages
+RUN pip3 install --no-cache-dir numpy pandas
+
+# Install mc_rtc packages
+RUN curl -1sLf 'https://dl.cloudsmith.io/public/mc-rtc/stable/setup.deb.sh' | bash && \
+    apt-get install -y lsb-release libmc-rtc-dev mc-rtc-utils libcopra-dev
+
+# Install mc_mujoco
+
+# Install BipedalLocomotionController Dependent Packages
+
+
+# Install mc_mujoco dependent packages:
+RUN apt-get install -y libxrandr-dev \
+    libxinerama-dev \
+    libxcursor-dev \
+    libxi-dev \
+    libglew-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV LOCAL_DIR=/home/local
+
+
+# Download and extract MuJoCo
+RUN wget https://github.com/google-deepmind/mujoco/releases/download/3.2.5/mujoco-3.2.5-linux-x86_64.tar.gz && \
+    mkdir -p ${LOCAL_DIR}/.mujoco && \
+    tar -xzf mujoco-3.2.5-linux-x86_64.tar.gz -C ${LOCAL_DIR}/.mujoco/ && \
+    rm mujoco-3.2.5-linux-x86_64.tar.gz
+
+
+# Set ENV variables and update bashrc
+RUN echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib:${LOCAL_DIR}/.mujoco/mujoco-3.2.5/bin\n\
+export PATH="$LD_LIBRARY_PATH:$PATH"\n\
+export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so' >> /root/.bashrc
+
+RUN git clone --recursive https://github.com/rohanpsingh/mc_mujoco.git && \
+    cd mc_mujoco && \
+    mkdir build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMUJOCO_ROOT_DIR=$LOCAL_DIR/.mujoco/mujoco-3.2.5 && \
+    make -j$((`nproc`/2)) && \
+    make install
+
+ENV HOME_DIR=/workspace/isaaclab
+
+# Define the entrypoint or command
+CMD ["bash"]
