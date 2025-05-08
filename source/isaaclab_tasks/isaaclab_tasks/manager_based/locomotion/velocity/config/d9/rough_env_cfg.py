@@ -48,7 +48,7 @@ class D9Rewards(RewardsCfg):
         func=mdp.feet_slide,
         weight=-0.25,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_roll"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
             "asset_cfg": SceneEntityCfg("robot", body_names=".*_Ankle_Roll"),
         },
     )
@@ -63,7 +63,7 @@ class D9Rewards(RewardsCfg):
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l1,
         weight=-0.2,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_Yaw", ".*_Hip_Joint_Roll", "*_Hip_Joint_Pitch"])},
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_Yaw", ".*_Hip_Joint_Roll", ".*_Hip_Joint_Pitch"])},
     )
     joint_deviation_arms = RewTerm(
         func=mdp.joint_deviation_l1,
@@ -140,11 +140,11 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.action_rate_l2.weight = -0.005
         self.rewards.dof_acc_l2.weight = -1.25e-7
         self.rewards.dof_acc_l2.params["asset_cfg"] = SceneEntityCfg(
-            "robot", joint_names=[".*_Hip_.*", ".*_Knee_Joint_Pitch"]
+            "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch"]
         )
         self.rewards.dof_torques_l2.weight = 0.0
         self.rewards.dof_torques_l2.params["asset_cfg"] = SceneEntityCfg(
-            "robot", joint_names=[".*_Hip_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_.*"]
+            "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"]
         )
 
         # Commands
