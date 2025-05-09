@@ -3,8 +3,9 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-from agent_world import AssetPath
+from isaaclab_assets.external_assets import ExternalAssetLoader
 
+loader = ExternalAssetLoader()
 import isaaclab.sim as sim_utils
 from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.assets import ArticulationCfg
@@ -14,7 +15,7 @@ from isaaclab.assets import ArticulationCfg
 
 PUDU_D9_12DOF_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=f"{AssetPath}/usd_files/robots/pudu_d9/d9_12dof.usd",
+        usd_path=loader.get_robot_usd_path("pudu_d9", "d9_12dof.usd"),
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -75,7 +76,7 @@ PUDU_D9_12DOF_CFG = ArticulationCfg(
 
 PUDU_D9_21DOF_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=f"{AssetPath}/usd_files/robots/pudu_d9/d9_21dof.usd",
+        usd_path=loader.get_robot_usd_path("pudu_d9", "d9_21dof.usd"),
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -99,7 +100,7 @@ PUDU_D9_21DOF_CFG = ArticulationCfg(
             ".*_Knee_Joint_Pitch": 0.0,
             ".*_Ankle_Joint_Pitch": 0.0,
             ".*_Ankle_Joint_Roll": 0.0,
-            ".*Waist": 0.0,
+            ".*Waist.*": 0.0,
             ".*_shoulder_pitch": 0.0,
             ".*_shoulder_yaw": 0.0,
             # ".*_elbow": 1.57,
@@ -119,21 +120,21 @@ PUDU_D9_21DOF_CFG = ArticulationCfg(
                 ".*_Hip_Joint_Roll",
                 ".*_Hip_Joint_Yaw",
                 ".*_Knee_Joint_Pitch",
-                ".*Waist",
+                ".*Waist.*",
             ],
             stiffness={
                 ".*_Hip_Joint_Pitch": 200.0,
                 ".*_Hip_Joint_Roll": 150.0,
                 ".*_Hip_Joint_Yaw": 150.0,
                 ".*_Knee_Joint_Pitch": 200.0,
-                ".*Waist": 200.0,
+                ".*Waist.*": 200.0,
             },
             damping={
                 ".*_Hip_Joint_Pitch": 5.0,
                 ".*_Hip_Joint_Roll": 5.0,
                 ".*_Hip_Joint_Yaw": 5.0,
                 ".*_Knee_Joint_Pitch": 5.0,
-                ".*Waist": 5.0,
+                ".*Waist.*": 5.0,
             },
             armature=0.01,
         ),
