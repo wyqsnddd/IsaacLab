@@ -30,6 +30,15 @@ if ! docker info > /dev/null 2>&1; then
     exit 1
 fi
 
+# 配置Docker使用HTTP协议访问mirrors.tencent.com
+echo "Configuring Docker to use HTTP for mirrors.tencent.com..."
+if [ ! -f "/etc/docker/daemon.json" ]; then
+    sudo mkdir -p /etc/docker
+    echo '{"insecure-registries": ["mirrors.tencent.com"]}' | sudo tee /etc/docker/daemon.json
+    sudo systemctl restart docker
+    echo "Docker daemon restarted with new configuration"
+fi
+
 tag_and_push() {
     if [ $# -ne 2 ]; then
         echo "Usage: tag_and_push <repository-name> <tag>"
