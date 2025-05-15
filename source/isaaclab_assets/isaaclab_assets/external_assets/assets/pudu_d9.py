@@ -92,12 +92,15 @@ PUDU_D9_21DOF_CFG = ArticulationCfg(
         ),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.74),
+        pos=(0.0, 0.0, 0.88),
         joint_pos={
+            # ".*_Hip_Joint_Pitch": 0.3,
             ".*_Hip_Joint_Pitch": 0.0,
             ".*_Hip_Joint_Roll": 0.0,
             ".*_Hip_Joint_Yaw": 0.0,
-            ".*_Knee_Joint_Pitch": 0.0,
+            # ".*_Knee_Joint_Pitch": -0.7,
+            ".*_Knee_Joint_Pitch": -0.0,
+            # ".*_Ankle_Joint_Pitch": 0.4,
             ".*_Ankle_Joint_Pitch": 0.0,
             ".*_Ankle_Joint_Roll": 0.0,
             ".*Waist.*": 0.0,
