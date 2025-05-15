@@ -32,13 +32,15 @@ declare -A used_gpus
 total_gpus=1
 used_count=0
 
-# 检查配置文件是否存在
-for i in $(seq 0 $(($total_gpus - 1))); do
-    if [ ! -f "training-${i}.yaml" ]; then
-        echo "错误: 找不到配置文件 training-${i}.yaml"
-        exit 1
-    fi
-done
+# 从YAML文件读取参数
+PARAM_FILE="training_params.yaml"
+if [ ! -f "$PARAM_FILE" ]; then
+    echo "错误: 找不到参数文件 $PARAM_FILE"
+    exit 1
+fi
+
+# 获取参数数量
+param_count=$(yq '.parameters | length' "$PARAM_FILE")
 
 echo "模式: $([ "$WAIT_ALL_GPUS" = true ] && echo "等待所有GPU" || echo "仅使用空闲GPU")"
 
@@ -52,13 +54,10 @@ while true; do
         if [[ -z "${used_gpus[$gpu_id]}" ]] && (( utilization < 10 )); then
             # 构建cfg-override参数
             cfg_overrides=""
-            config_file="training-${used_count}.yaml"
-
-            # 使用yq读取参数并构建cfg-override字符串
-            param_count=$(yq '.parameters | length' "$config_file")
             for ((i=0; i<param_count; i++)); do
-                param_name=$(yq ".parameters[$i].name" "$config_file")
-                param_weight=$(yq ".parameters[$i].weights" "$config_file")
+                weights=(${param_weights[$i]})
+                param_name=$(yq ".parameters[$i].name" "$PARAM_FILE")
+                param_weight=$(yq ".parameters[$i].weights[$used_count]" "$PARAM_FILE")
                 cfg_overrides="$cfg_overrides +$param_name=$param_weight"
             done
 
@@ -66,7 +65,7 @@ while true; do
             log_file="${LOG_PREFIX}_${gpu_id}_run${used_count}.log"
 
             echo "[$(date +'%F %T')] GPU $gpu_id 空闲（利用率 ${utilization}%），启动训练任务..."
-            echo "使用配置文件: $config_file"
+            echo "使用参数配置 #$used_count"
 
             # 启动后台任务并捕获 PID
             eval "nohup ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py \
