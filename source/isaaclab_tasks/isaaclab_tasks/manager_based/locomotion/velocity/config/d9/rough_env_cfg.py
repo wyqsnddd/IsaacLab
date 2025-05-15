@@ -24,20 +24,19 @@ class D9Rewards(RewardsCfg):
 
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
 
-    lin_vel_z_l2 = None
     track_lin_vel_xy_exp = RewTerm(
         func=mdp.track_lin_vel_xy_yaw_frame_exp,
-        weight=1.0,
-        params={"command_name": "base_velocity", "std": 0.5},
+        weight=1.5,
+        params={"command_name": "base_velocity", "std": 0.25},
     )
 
     track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_world_exp, weight=1.0, params={"command_name": "base_velocity", "std": 0.5}
+        func=mdp.track_ang_vel_z_world_exp, weight=1.0, params={"command_name": "base_velocity", "std": 0.25}
     )
 
     feet_air_time = RewTerm(
         func=mdp.feet_air_time_positive_biped,
-        weight=0.25,
+        weight=1.0,
         params={
             "command_name": "base_velocity",
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
@@ -62,8 +61,12 @@ class D9Rewards(RewardsCfg):
     # Penalize deviation from default of the joints that are not essential for locomotion
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l1,
-        weight=-0.2,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_Yaw", ".*_Hip_Joint_Roll", ".*_Hip_Joint_Pitch"])},
+        weight=-0.1,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_names=[".*_Hip_Joint_Yaw", ".*_Hip_Joint_Roll", ".*_Hip_Joint_Pitch"]
+            )
+        },
     )
     joint_deviation_arms = RewTerm(
         func=mdp.joint_deviation_l1,
@@ -71,33 +74,37 @@ class D9Rewards(RewardsCfg):
         params={
             "asset_cfg": SceneEntityCfg(
                 "robot",
-                joint_names=[
-                    ".*_shoulder_pitch",
-                    ".*_shoulder_roll",
-                    ".*_shoulder_yaw",
-                    ".*_elbow"
-                ],
+                joint_names=[".*_shoulder_pitch", ".*_shoulder_roll", ".*_shoulder_yaw", ".*_elbow"],
             )
         },
     )
-    # joint_deviation_fingers = RewTerm(
+
+    # joint_deviation_knee = RewTerm(
     #     func=mdp.joint_deviation_l1,
-    #     weight=-0.05,
+    #     weight=-0.3,
     #     params={
     #         "asset_cfg": SceneEntityCfg(
     #             "robot",
     #             joint_names=[
-    #                 ".*_five_joint",
-    #                 ".*_three_joint",
-    #                 ".*_six_joint",
-    #                 ".*_four_joint",
-    #                 ".*_zero_joint",
-    #                 ".*_one_joint",
-    #                 ".*_two_joint",
+    #                 ".*_Knee_Joint_Pitch",
     #             ],
     #         )
     #     },
     # )
+    # joint_deviation_ankle = RewTerm(
+    #     func=mdp.joint_deviation_l1,
+    #     weight=-0.1,
+    #     params={
+    #         "asset_cfg": SceneEntityCfg(
+    #             "robot",
+    #             joint_names=[
+    #                 ".*_Ankle_Joint_Pitch",
+    #                 ".*_Ankle_Joint_Roll",
+    #             ],
+    #         )
+    #     },
+    # )
+
     joint_deviation_torso = RewTerm(
         func=mdp.joint_deviation_l1,
         weight=-0.1,
@@ -135,14 +142,16 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         }
 
         # Rewards
+        self.rewards.lin_vel_z_l2.weight = -0.2
+        self.rewards.ang_vel_xy_l2.weight = -0.05
         self.rewards.undesired_contacts = None
         self.rewards.flat_orientation_l2.weight = -1.0
         self.rewards.action_rate_l2.weight = -0.005
-        self.rewards.dof_acc_l2.weight = -1.25e-7
+        self.rewards.dof_acc_l2.weight = -2.5e-7
         self.rewards.dof_acc_l2.params["asset_cfg"] = SceneEntityCfg(
             "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch"]
         )
-        self.rewards.dof_torques_l2.weight = 0.0
+        self.rewards.dof_torques_l2.weight = -1.0e-5
         self.rewards.dof_torques_l2.params["asset_cfg"] = SceneEntityCfg(
             "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"]
         )
