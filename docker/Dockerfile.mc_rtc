@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y debconf-utils \
     c++filt \
     clang-format \
     vim \
+    jq \
     python3 \
     python3-pip \
     libssl-dev \
@@ -43,7 +44,7 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0
 RUN cmake --version
 
 # Install additional Python packages
-RUN pip3 install --no-cache-dir numpy pandas
+RUN pip3 install --no-cache-dir numpy pandas yq
 
 # Install mc_rtc packages
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/mc-rtc/stable/setup.deb.sh' | bash && \
@@ -83,6 +84,29 @@ RUN git clone --recursive https://github.com/rohanpsingh/mc_mujoco.git && \
     cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMUJOCO_ROOT_DIR=$LOCAL_DIR/.mujoco/mujoco-3.2.5 && \
     make -j$((`nproc`/2)) && \
     make install
+
+# Install packages tmux, terminator:
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+ && add-apt-repository ppa:dartsim/ppa \
+ && apt-get update \
+ && apt-get install -y \
+    terminator \
+    tmux \
+    libdart-all-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+
+# 部署CLI工具
+RUN mkdir -p /root/.ft \
+    && wget https://mirrors.tencent.com/repository/generic/ft/files/bin/cli_linux_386 -O /root/.ft/cli_linux_386 \
+    && chmod +x /root/.ft/cli_linux_386
+
+# 永久添加CLI目录到PATH
+ENV PATH="/root/.ft:$PATH"
+ENV FT_DEBUG=1
+
+RUN /root/.ft/cli_linux_386 install
 
 ENV HOME_DIR=/workspace/isaaclab
 
