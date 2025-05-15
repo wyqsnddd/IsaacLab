@@ -33,7 +33,9 @@ for PID in $PIDS; do
         continue
     fi
 
-    if grep -q "train.py.*--task $TASK_NAME" /proc/$PID/cmdline 2>/dev/null; then
+    # 使用ps命令获取进程命令行，这样更可靠
+    CMDLINE=$(ps -p $PID -o cmd= 2>/dev/null)
+    if echo "$CMDLINE" | grep -q "train.py.*--task $TASK_NAME"; then
         echo "终止进程树 PID:$PID"
 
         if check_command pstree; then
@@ -42,10 +44,26 @@ for PID in $PIDS; do
 
         sudo kill -$SIGNAL -- -$(ps -o pgid= $PID | tr -d ' ') 2>/dev/null
 
-        timeout 5s tail --pid=$PID -f /dev/null || (
-            echo "强制终止 $PID"
+        # 等待进程终止，最多等待5秒
+        for i in {1..5}; do
+            if ! ps -p $PID >/dev/null; then
+                echo "进程 $PID 已成功终止"
+                break
+            fi
+            sleep 1
+        done
+
+        # 如果进程仍然存在，使用 SIGKILL 强制终止
+        if ps -p $PID >/dev/null; then
+            echo "进程 $PID 未响应，正在强制终止..."
             sudo kill -9 $PID
-        )
+            sleep 1
+            if ps -p $PID >/dev/null; then
+                echo "警告: 进程 $PID 仍然存在，可能需要手动检查"
+            else
+                echo "进程 $PID 已强制终止"
+            fi
+        fi
     else
         echo "跳过无关进程 PID:$PID"
     fi
