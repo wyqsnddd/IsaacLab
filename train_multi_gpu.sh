@@ -48,6 +48,12 @@ while true; do
     # 获取所有 GPU 的利用率（格式：gpu_index utilization）
     gpu_utils=$(nvidia-smi --query-gpu=index,utilization.gpu --format=csv,noheader,nounits | tr -d ' ')
 
+    # 如果已经使用了所有需要的GPU，退出循环
+    if (( used_count >= total_gpus )); then
+        echo "[$(date +'%F %T')] 已达到目标GPU使用数量 ($total_gpus)，退出监控循环。"
+        break
+    fi
+
     # 遍历每个 GPU
     while IFS=',' read -r gpu_id utilization; do
         # 检查 GPU 是否已被使用
