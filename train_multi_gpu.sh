@@ -45,14 +45,14 @@ param_count=$(yq '.parameters | length' "$PARAM_FILE")
 echo "模式: $([ "$WAIT_ALL_GPUS" = true ] && echo "等待所有GPU" || echo "仅使用空闲GPU")"
 
 while true; do
-    # 获取所有 GPU 的利用率（格式：gpu_index utilization）
-    gpu_utils=$(nvidia-smi --query-gpu=index,utilization.gpu --format=csv,noheader,nounits | tr -d ' ')
-
     # 如果已经使用了所有需要的GPU，退出循环
     if (( used_count >= total_gpus )); then
         echo "[$(date +'%F %T')] 已达到目标GPU使用数量 ($total_gpus)，退出监控循环。"
         break
     fi
+
+    # 获取所有 GPU 的利用率（格式：gpu_index utilization）
+    gpu_utils=$(nvidia-smi --query-gpu=index,utilization.gpu --format=csv,noheader,nounits | tr -d ' ')
 
     # 遍历每个 GPU
     while IFS=',' read -r gpu_id utilization; do
@@ -90,10 +90,10 @@ while true; do
             echo "GPU $gpu_id 进程 PID: $pid | 日志文件: $log_file"
             echo "已使用 GPU 数量: $used_count/$total_gpus"
 
-            # 检查是否所有 GPU 都已使用
-            if [ "$WAIT_ALL_GPUS" = true ] && (( used_count >= total_gpus )); then
-                echo "[$(date +'%F %T')] 所有 GPU 都已分配任务，监控结束。"
-                exit 0
+            # 如果已经使用了所有需要的GPU，立即退出循环
+            if (( used_count >= total_gpus )); then
+                echo "[$(date +'%F %T')] 已达到目标GPU使用数量 ($total_gpus)，退出监控循环。"
+                break 2
             fi
 
             # 延迟防止重复触发
