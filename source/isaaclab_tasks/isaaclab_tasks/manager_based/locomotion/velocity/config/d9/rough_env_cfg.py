@@ -52,6 +52,15 @@ class D9Rewards(RewardsCfg):
         },
     )
 
+    base_height = RewTerm(
+        func=mdp.base_height_l2,
+        weight=0.0,
+        params={
+            "target_height": 0.88,
+            "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
+        },
+    )
+
     # Penalize ankle joint limits
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
@@ -155,6 +164,9 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.dof_torques_l2.params["asset_cfg"] = SceneEntityCfg(
             "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"]
         )
+
+        # Additional Rewards
+        self.rewards.base_height.weight = 0.0
 
         # Commands
         self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
