@@ -67,6 +67,7 @@ class D9Rewards(RewardsCfg):
         weight=-1.0,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Ankle_Joint_Pitch", ".*_Ankle_Joint_Roll"])},
     )
+
     # Penalize deviation from default of the joints that are not essential for locomotion
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l1,
@@ -77,9 +78,31 @@ class D9Rewards(RewardsCfg):
             )
         },
     )
+
+    joint_deviation_hip_2 = RewTerm(
+        func=mdp.joint_deviation_l2,
+        weight=0.0,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_names=[".*_Hip_Joint_Yaw", ".*_Hip_Joint_Roll", ".*_Hip_Joint_Pitch"]
+            )
+        },
+    )
+
     joint_deviation_arms = RewTerm(
         func=mdp.joint_deviation_l1,
         weight=-0.2,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                joint_names=[".*_shoulder_pitch", ".*_shoulder_roll", ".*_shoulder_yaw", ".*_elbow"],
+            )
+        },
+    )
+
+    joint_deviation_arms_2 = RewTerm(
+        func=mdp.joint_deviation_l2,
+        weight=0.0,
         params={
             "asset_cfg": SceneEntityCfg(
                 "robot",
@@ -117,6 +140,12 @@ class D9Rewards(RewardsCfg):
     joint_deviation_torso = RewTerm(
         func=mdp.joint_deviation_l1,
         weight=-0.1,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names="Waist_Joint_Yaw")},
+    )
+
+    joint_deviation_torso_2 = RewTerm(
+        func=mdp.joint_deviation_l2,
+        weight=0.0,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names="Waist_Joint_Yaw")},
     )
 
