@@ -15,6 +15,10 @@ from isaaclab.managers import SceneEntityCfg
 from isaaclab.utils import configclass
 
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as mdp
+from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards import (
+    air_time_variance_penalty,
+    biped_gait_reward,
+)
 from isaaclab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityRoughEnvCfg, RewardsCfg
 
 
@@ -43,6 +47,30 @@ class D9Rewards(RewardsCfg):
             "threshold": 0.4,
         },
     )
+
+    # Add air time variance penalty
+    air_time_variance_penalty = RewTerm(
+        func=air_time_variance_penalty,
+        weight=-0.1,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "std": 0.1,
+        },
+    )
+
+    # Add gait reward for bipedal walking
+    gait_reward = RewTerm(
+        func=biped_gait_reward,
+        weight=0.5,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_Ankle_Roll"),
+            "std": 0.1,
+            "max_err": 0.2,
+            "velocity_threshold": 0.1,
+        },
+    )
+
     feet_slide = RewTerm(
         func=mdp.feet_slide,
         weight=-0.25,
