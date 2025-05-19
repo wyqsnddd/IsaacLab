@@ -50,33 +50,14 @@ while true; do
     while IFS=',' read -r gpu_id utilization; do
         # 检查 GPU 是否已被使用
         if [[ -z "${used_gpus[$gpu_id]}" ]] && (( utilization < 10 )); then
-            # 构建cfg-override参数
-            cfg_overrides=""
-            config_file="training-${used_count}.yaml"
-
-            # 使用yq读取参数并构建cfg-override字符串
-            param_count=$(yq '.parameters | length' "$config_file")
-            for ((i=0; i<param_count; i++)); do
-                param_name=$(yq ".parameters[$i].name" "$config_file")
-                param_weight=$(yq ".parameters[$i].weights" "$config_file")
-                cfg_overrides="$cfg_overrides +$param_name=$param_weight"
-            done
-
             # 生成带 GPU ID 的日志文件名
-            log_file="${LOG_PREFIX}_${gpu_id}_run${used_count}.log"
+            log_file="${LOG_PREFIX}_multi_gpu_${gpu_id}_run${used_count}.log"
 
             echo "[$(date +'%F %T')] GPU $gpu_id 空闲（利用率 ${utilization}%），启动训练任务..."
-            echo "使用配置文件: $config_file"
+            echo "使用参数配置 #$used_count"
 
-            # 启动后台任务并捕获 PID
-            eval "nohup ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py \
-                --task Isaac-Velocity-Flat-D9-v0 \
-                --headless \
-                --num_envs 4096 \
-                --video --video_length 200 --video_interval 1000 \
-                --device \"cuda:$gpu_id\" \
-                $cfg_overrides > \"$log_file\" 2>&1 &"
-            pid=$!
+            # 启动训练任务并捕获 PID
+            pid=$(./modify_weight_unique_cfgs.sh "$gpu_id" "$used_count" "$log_file")
 
             # 记录已使用的 GPU
             used_gpus[$gpu_id]=$pid
