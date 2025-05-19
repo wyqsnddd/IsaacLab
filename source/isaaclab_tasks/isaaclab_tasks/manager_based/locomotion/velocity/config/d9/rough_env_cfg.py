@@ -51,6 +51,15 @@ class D9Rewards(RewardsCfg):
             "asset_cfg": SceneEntityCfg("robot", body_names=".*_Ankle_Roll"),
         },
     )
+    feet_swing_height = RewTerm(
+        func=mdp.feet_swing_height,
+        weight=0.0,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_Ankle_Roll"),
+            "target_height": 0.12,
+        },
+    )
 
     base_height = RewTerm(
         func=mdp.base_height_l2,

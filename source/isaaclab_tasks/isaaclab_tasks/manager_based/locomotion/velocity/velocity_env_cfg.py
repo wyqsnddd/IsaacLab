@@ -240,6 +240,15 @@ class RewardsCfg:
     dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5)
     dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)
+    feet_swing_height = RewTerm(
+        func=mdp.feet_swing_height,
+        weight=0.0,
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*FOOT"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*FOOT"),
+            "target_height": 0.12,
+        },
+    )
     feet_air_time = RewTerm(
         func=mdp.feet_air_time,
         weight=0.125,

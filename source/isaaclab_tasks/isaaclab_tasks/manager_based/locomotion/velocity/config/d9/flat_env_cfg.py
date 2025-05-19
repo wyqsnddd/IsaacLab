@@ -22,15 +22,16 @@ class D9FlatEnvCfg(D9RoughEnvCfg):
         self.observations.policy.height_scan = None
         # no terrain curriculum
         self.curriculum.terrain_levels = None
-        self.rewards.base_height.weight = 0.0
+        self.rewards.base_height.weight = -0.5
+        self.rewards.feet_swing_height.weight = 0.0
         self.rewards.track_lin_vel_xy_exp.weight = 1.5
-        self.rewards.track_ang_vel_z_exp.weight = 1
+        self.rewards.track_ang_vel_z_exp.weight = 1.6
         self.rewards.lin_vel_z_l2.weight = -0.2
         self.rewards.ang_vel_xy_l2.weight = -0.05
         self.rewards.dof_torques_l2.weight = -1e-05
         self.rewards.dof_acc_l2.weight = -2.5e-07
         self.rewards.action_rate_l2.weight = -0.005
-        self.rewards.feet_air_time.weight = 1.0
+        self.rewards.feet_air_time.weight = 1.5
         self.rewards.feet_air_time.params["threshold"] = 0.6
         self.rewards.flat_orientation_l2.weight = -1.0
         self.rewards.dof_pos_limits.weight = -1.0

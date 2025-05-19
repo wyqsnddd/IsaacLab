@@ -104,3 +104,34 @@ def track_ang_vel_z_world_exp(
     asset = env.scene[asset_cfg.name]
     ang_vel_error = torch.square(env.command_manager.get_command(command_name)[:, 2] - asset.data.root_ang_vel_w[:, 2])
     return torch.exp(-ang_vel_error / std**2)
+
+
+def feet_swing_height(
+    env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg, sensor_cfg: SceneEntityCfg, target_height: float = 0.12
+) -> torch.Tensor:
+    """Penalize ankle height away from target height.
+
+    This function penalizes the agent when the feet are not at the target height during swing phase.
+    The penalty is only applied when the feet are not in contact with the ground.
+
+    Args:
+        env: The RL environment instance.
+        asset_cfg: Configuration for the robot asset.
+        sensor_cfg: Configuration for the contact sensor.
+        target_height: Target height for the feet during swing phase.
+
+    Returns:
+        The reward value.
+    """
+    # Get contact forces
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    contact = torch.norm(contact_sensor.data.net_forces_w_history[:, :, sensor_cfg.body_ids, :3], dim=2) > 1.0
+
+    # Get foot positions
+    asset = env.scene[asset_cfg.name]
+    foot_pos = asset.data.body_pos_w[:, asset_cfg.body_ids, 2]
+
+    # Compute position error only when not in contact
+    pos_error = torch.square(foot_pos - target_height) * ~contact
+
+    return torch.sum(pos_error, dim=1)
