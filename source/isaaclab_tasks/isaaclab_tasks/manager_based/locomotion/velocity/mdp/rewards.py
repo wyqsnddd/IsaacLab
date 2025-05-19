@@ -125,7 +125,11 @@ def feet_swing_height(
     """
     # Get contact forces
     contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
-    contact = torch.norm(contact_sensor.data.net_forces_w_history[:, :, sensor_cfg.body_ids, :3], dim=2) > 1.0
+    # Take max over history and check if any force component is above threshold
+    contact = (
+        torch.max(torch.norm(contact_sensor.data.net_forces_w_history[:, :, sensor_cfg.body_ids, :3], dim=-1), dim=1)[0]
+        > 1.0
+    )
 
     # Get foot positions
     asset = env.scene[asset_cfg.name]
