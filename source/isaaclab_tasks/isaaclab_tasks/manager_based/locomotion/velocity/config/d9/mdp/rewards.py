@@ -18,6 +18,55 @@ if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
 
 
+def phase_based_contact_reward(
+    env: ManagerBasedRLEnv,
+    sensor_cfg: SceneEntityCfg,
+    period: float = 0.8,
+    offset: float = 0.5,
+    std: float = 0.1,
+    force_threshold: float = 1.0,
+) -> torch.Tensor:
+    """Reward for phase-based contact pattern that encourages periodic foot contacts.
+
+    Args:
+        env: The RL environment instance.
+        sensor_cfg: Configuration for the contact sensor.
+        period: Period of the gait cycle in seconds.
+        offset: Phase offset between left and right feet (0.5 for alternating).
+        std: Standard deviation for the exponential kernel.
+        force_threshold: Threshold for considering a contact as active.
+
+    Returns:
+        The reward value.
+    """
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+
+    # Calculate phases
+    phase = (env.episode_length_buf * env.dt) % period / period
+    phase_left = phase
+    phase_right = (phase + offset) % 1.0
+
+    # Get contact states
+    contact_forces = contact_sensor.data.contact_forces[:, sensor_cfg.body_ids, :3]
+    in_contact = torch.norm(contact_forces, dim=2) > force_threshold
+
+    # Calculate desired contact states based on phase
+    # We want contact when phase is between 0.5 and 1.0
+    desired_contact_left = (phase_left > 0.5).float()
+    desired_contact_right = (phase_right > 0.5).float()
+
+    # Calculate contact errors
+    contact_error_left = torch.square(in_contact[:, 0] - desired_contact_left)
+    contact_error_right = torch.square(in_contact[:, 1] - desired_contact_right)
+
+    # Calculate reward using exponential kernel
+    reward_left = torch.exp(-contact_error_left / std)
+    reward_right = torch.exp(-contact_error_right / std)
+
+    # Combine rewards
+    return (reward_left + reward_right) / 2.0
+
+
 def air_time_variance_penalty(
     env: ManagerBasedRLEnv,
     sensor_cfg: SceneEntityCfg,
@@ -95,3 +144,40 @@ def biped_gait_reward(
     body_vel = torch.linalg.norm(asset.data.root_lin_vel_b[:, :2], dim=1)
 
     return torch.where(torch.logical_or(cmd > 0.0, body_vel > velocity_threshold), sync_reward, 0.0)
+
+
+def contact_no_velocity_penalty(
+    env: ManagerBasedRLEnv,
+    sensor_cfg: SceneEntityCfg,
+    asset_cfg: SceneEntityCfg,
+    force_threshold: float = 1.0,
+) -> torch.Tensor:
+    """Penalize contact with no velocity to prevent sliding or stalling.
+
+    Args:
+        env: The RL environment instance.
+        sensor_cfg: Configuration for the contact sensor.
+        asset_cfg: Configuration for the robot asset.
+        force_threshold: Threshold for considering a contact as active.
+
+    Returns:
+        The reward value (negative penalty).
+    """
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    asset: Articulation = env.scene[asset_cfg.name]
+
+    # Get contact forces and foot velocities
+    contact_forces = contact_sensor.data.contact_forces[:, sensor_cfg.body_ids, :3]
+    foot_velocities = asset.data.body_lin_vel_w[:, sensor_cfg.body_ids, :3]
+
+    # Check which feet are in contact (force magnitude > threshold)
+    in_contact = torch.norm(contact_forces, dim=2) > force_threshold
+
+    # Get velocities of feet that are in contact
+    contact_feet_vel = foot_velocities * in_contact.unsqueeze(-1)
+
+    # Calculate penalty as squared velocity of contacting feet
+    penalty = torch.square(contact_feet_vel)
+
+    # Sum over all feet and dimensions
+    return -torch.sum(penalty, dim=(1, 2))

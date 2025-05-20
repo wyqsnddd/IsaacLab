@@ -18,6 +18,8 @@ import isaaclab_tasks.manager_based.locomotion.velocity.mdp as mdp
 from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards import (
     air_time_variance_penalty,
     biped_gait_reward,
+    contact_no_velocity_penalty,
+    phase_based_contact_reward,
 )
 from isaaclab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityRoughEnvCfg, RewardsCfg
 
@@ -68,6 +70,30 @@ class D9Rewards(RewardsCfg):
             "std": 0.1,
             "max_err": 0.2,
             "velocity_threshold": 0.1,
+        },
+    )
+
+    # Add phase-based contact reward
+    phase_contact_reward = RewTerm(
+        func=phase_based_contact_reward,
+        weight=1.0,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "period": 0.8,
+            "offset": 0.5,
+            "std": 0.1,
+            "force_threshold": 1.0,
+        },
+    )
+
+    # Add contact no velocity penalty
+    contact_no_velocity_penalty = RewTerm(
+        func=contact_no_velocity_penalty,
+        weight=-0.2,  # Negative weight since this is a penalty
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_Ankle_Roll"),
+            "force_threshold": 1.0,
         },
     )
 
