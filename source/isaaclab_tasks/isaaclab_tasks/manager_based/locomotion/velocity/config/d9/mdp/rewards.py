@@ -41,14 +41,18 @@ def phase_based_contact_reward(
     """
     contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
 
-    # Calculate phases
-    phase = (env.episode_length_buf * env.dt) % period / period
+    # Calculate phases using environment's step_dt
+    dt = env.step_dt  # Get dt from environment's step_dt property
+    phase = (env.episode_length_buf * dt) % period / period
     phase_left = phase
     phase_right = (phase + offset) % 1.0
 
     # Get contact states
-    contact_forces = contact_sensor.data.contact_forces[:, sensor_cfg.body_ids, :3]
+    contact_forces = contact_sensor.data.net_forces_w[:, sensor_cfg.body_ids, :3]
     in_contact = torch.norm(contact_forces, dim=2) > force_threshold
+
+    # Convert boolean contact states to float
+    in_contact_float = in_contact.float()
 
     # Calculate desired contact states based on phase
     # We want contact when phase is between 0.5 and 1.0
@@ -56,8 +60,8 @@ def phase_based_contact_reward(
     desired_contact_right = (phase_right > 0.5).float()
 
     # Calculate contact errors
-    contact_error_left = torch.square(in_contact[:, 0] - desired_contact_left)
-    contact_error_right = torch.square(in_contact[:, 1] - desired_contact_right)
+    contact_error_left = torch.square(in_contact_float[:, 0] - desired_contact_left)
+    contact_error_right = torch.square(in_contact_float[:, 1] - desired_contact_right)
 
     # Calculate reward using exponential kernel
     reward_left = torch.exp(-contact_error_left / std)
@@ -167,7 +171,7 @@ def contact_no_velocity_penalty(
     asset: Articulation = env.scene[asset_cfg.name]
 
     # Get contact forces and foot velocities
-    contact_forces = contact_sensor.data.contact_forces[:, sensor_cfg.body_ids, :3]
+    contact_forces = contact_sensor.data.net_forces_w[:, sensor_cfg.body_ids, :3]
     foot_velocities = asset.data.body_lin_vel_w[:, sensor_cfg.body_ids, :3]
 
     # Check which feet are in contact (force magnitude > threshold)
