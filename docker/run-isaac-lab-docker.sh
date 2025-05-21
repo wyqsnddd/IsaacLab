@@ -3,8 +3,10 @@
 
 # 设置变量
 IMAGE_NAME="mirrors.tencent.com/rl-for-control/isaac-lab-mc_rtc"
+#IMAGE_NAME="isaac-lab-base"
 IMAGE_TAG="latest"  # 或使用时间戳标签
 CONTAINER_NAME="isaac-lab-mc_rtc-yuquan"
+#CONTAINER_NAME="isaac-lab-base-latest"
 
 # 检查镜像是否存在
 if ! docker image inspect ${IMAGE_NAME}:${IMAGE_TAG} >/dev/null 2>&1; then
