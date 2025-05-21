@@ -29,6 +29,8 @@ class D9Rewards(RewardsCfg):
     """Reward terms for the MDP."""
 
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
+    
+    alive = RewTerm(func=mdp.is_alive, weight=2.0)
 
     track_lin_vel_xy_exp = RewTerm(
         func=mdp.track_lin_vel_xy_yaw_frame_exp,
@@ -267,6 +269,26 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
 
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = ["base_link", "Waist_Yaw", ".*_Hip_.*"]
+        
+        # Add illegal contact termination
+        self.terminations.illegal_contact = RewTerm(
+            func=mdp.illegal_contact,
+            weight=1.0,
+            params={
+                "threshold": 400.0,  # Force threshold in Newtons
+                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_Ankle_Joint_.*"]),
+            },
+        )
+        
+        # Add bad orientation termination
+        self.terminations.bad_orientation = RewTerm(
+            func=mdp.bad_orientation,
+            weight=1.0,
+            params={
+                "threshold": 0.436,  # Orientation threshold in radians, approximately 25 degrees
+                "asset_cfg": SceneEntityCfg("robot", body_names="base_link", "Waist_Yaw"),
+            },
+        )
 
 
 @configclass
