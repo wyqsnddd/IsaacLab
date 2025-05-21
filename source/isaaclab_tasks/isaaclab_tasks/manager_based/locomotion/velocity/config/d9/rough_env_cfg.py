@@ -13,6 +13,7 @@ from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_12DOF_CFG, PU
 from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.utils import configclass
+from isaaclab.managers import TerminationTermCfg
 
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as mdp
 from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards import (
@@ -271,23 +272,23 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.terminations.base_contact.params["sensor_cfg"].body_names = ["base_link", "Waist_Yaw", ".*_Hip_.*"]
         
         # Add illegal contact termination
-        self.terminations.illegal_contact = RewTerm(
+        self.terminations.illegal_contact = TerminationTermCfg(
             func=mdp.illegal_contact,
-            weight=1.0,
             params={
                 "threshold": 400.0,  # Force threshold in Newtons
                 "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_Ankle_Joint_.*"]),
             },
+            time_out=False,
         )
         
         # Add bad orientation termination
-        self.terminations.bad_orientation = RewTerm(
+        self.terminations.bad_orientation = TerminationTermCfg(
             func=mdp.bad_orientation,
-            weight=1.0,
             params={
                 "threshold": 0.436,  # Orientation threshold in radians, approximately 25 degrees
-                "asset_cfg": SceneEntityCfg("robot", body_names="base_link", "Waist_Yaw"),
+                "asset_cfg": SceneEntityCfg("robot", body_names=["base_link", "Waist_Yaw"]),
             },
+            time_out=False,
         )
 
 
