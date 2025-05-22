@@ -11,9 +11,8 @@
 from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_12DOF_CFG, PUDU_D9_21DOF_CFG  # noqa F401
 
 from isaaclab.managers import RewardTermCfg as RewTerm
-from isaaclab.managers import SceneEntityCfg
+from isaaclab.managers import SceneEntityCfg, TerminationTermCfg
 from isaaclab.utils import configclass
-from isaaclab.managers import TerminationTermCfg
 
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as mdp
 from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards import (
@@ -21,6 +20,7 @@ from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards impo
     biped_gait_reward,
     contact_no_velocity_penalty,
     phase_based_contact_reward,
+    utils_no_fly,
 )
 from isaaclab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityRoughEnvCfg, RewardsCfg
 
@@ -30,7 +30,7 @@ class D9Rewards(RewardsCfg):
     """Reward terms for the MDP."""
 
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
-    
+
     alive = RewTerm(func=mdp.is_alive, weight=2.0)
 
     track_lin_vel_xy_exp = RewTerm(
@@ -51,6 +51,13 @@ class D9Rewards(RewardsCfg):
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
             "threshold": 0.4,
         },
+    )
+    no_fly = RewTerm(
+        func=utils_no_fly,
+        weight=0.25,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Link_Ankle_Roll"),
+        },  # W: Trailing whitespace
     )
 
     # Add air time variance penalty
@@ -131,12 +138,17 @@ class D9Rewards(RewardsCfg):
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
         weight=-1.0,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Ankle_Joint_Pitch", ".*_Ankle_Joint_Roll"])},
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_Pitch", ".*_Ankle_Joint_Roll"],
+            )
+        },
     )
 
     # Penalize deviation from default of the joints that are not essential for locomotion
     joint_deviation_hip = RewTerm(
-        func=mdp.joint_deviation_l1,
+        func=mdp.joint_deviation_l2,
         weight=-0.1,
         params={
             "asset_cfg": SceneEntityCfg(
@@ -270,22 +282,23 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
 
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = ["base_link", "Waist_Yaw", ".*_Hip_.*"]
-        
+
         # Add illegal contact termination
         self.terminations.illegal_contact = TerminationTermCfg(
             func=mdp.illegal_contact,
             params={
                 "threshold": 400.0,  # Force threshold in Newtons
-                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_Ankle_Joint_.*"]),
+                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_Ankle_Roll"]),
             },
             time_out=False,
         )
-        
+
         # Add bad orientation termination
         self.terminations.bad_orientation = TerminationTermCfg(
             func=mdp.bad_orientation,
             params={
-                "threshold": 0.436,  # Orientation threshold in radians, approximately 25 degrees
+                # "limit_angle": 0.436,  # Limit angle in radians (approximately 25 degrees)
+                "limit_angle": 1.0,  # Limit angle in radians (approximately 57 degrees)
                 "asset_cfg": SceneEntityCfg("robot", body_names=["base_link", "Waist_Yaw"]),
             },
             time_out=False,
