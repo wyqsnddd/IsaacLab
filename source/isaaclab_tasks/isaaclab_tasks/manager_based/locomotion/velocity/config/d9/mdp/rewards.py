@@ -137,8 +137,8 @@ def biped_gait_reward(
     contact_time_diff = torch.square(contact_times[:, 0] - contact_times[:, 1])
 
     # Clip errors
-    air_time_diff = torch.clip(air_time_diff, max=max_err**2)
-    contact_time_diff = torch.clip(contact_time_diff, max=max_err**2)
+    air_time_diff = torch.clip(air_time_diff, max=max_err ** 2)
+    contact_time_diff = torch.clip(contact_time_diff, max=max_err ** 2)
 
     # Calculate reward using exponential kernel
     sync_reward = torch.exp(-(air_time_diff + contact_time_diff) / std)
@@ -148,6 +148,19 @@ def biped_gait_reward(
     body_vel = torch.linalg.norm(asset.data.root_lin_vel_b[:, :2], dim=1)
 
     return torch.where(torch.logical_or(cmd > 0.0, body_vel > velocity_threshold), sync_reward, 0.0)
+
+
+def utils_no_fly(
+    env: ManagerBasedRLEnv,  # W: Trailing whitespace
+    sensor_cfg: SceneEntityCfg,
+) -> torch.Tensor:
+    """Penalty: return 1 if exactly one foot is in contact (no flying), else 0."""
+
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    forces = contact_sensor.data.net_forces_w_history[:, -1, sensor_cfg.body_ids, 2]
+    contacts = forces > 0.1
+    single = torch.sum(contacts.float(), dim=1) == 1
+    return single.float()
 
 
 def contact_no_velocity_penalty(
