@@ -11,18 +11,18 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, R
 @configclass
 class D9RoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
-    max_iterations = 10000
-    save_interval = 50
+    max_iterations = 5000
+    save_interval = 200
     experiment_name = "d9_rough"
     empirical_normalization = False
     policy = RslRlPpoActorCriticCfg(
-        init_noise_std=1.0,
+        init_noise_std=0.8,
         actor_hidden_dims=[512, 256, 128],
         critic_hidden_dims=[512, 256, 128],
         activation="elu",
     )
     algorithm = RslRlPpoAlgorithmCfg(
-        value_loss_coef=2.0,
+        value_loss_coef=4.0,
         use_clipped_value_loss=True,
         clip_param=0.2,
         entropy_coef=0.006,
