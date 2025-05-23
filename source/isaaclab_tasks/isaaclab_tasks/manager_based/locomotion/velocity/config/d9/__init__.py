@@ -16,8 +16,8 @@ gym.register(
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.rough_env_cfg:D9RoughEnvEasyCfg",
-        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:D9RoughPPORunnerCfg",
+        "env_cfg_entry_point": f"{__name__}.rough_env_easy_cfg:D9RoughEnvEasyCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.d9_rsl_rl_ppo_cfg:D9RoughPPORunnerEasyCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_rough_ppo_cfg.yaml",
     },
 )
@@ -28,8 +28,8 @@ gym.register(
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.rough_env_cfg:D9RoughEnvEasyCfg_PLAY",
-        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:D9RoughPPORunnerCfg",
+        "env_cfg_entry_point": f"{__name__}.rough_env_easy_cfg:D9RoughEnvEasyCfg_PLAY",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.d9_rsl_rl_ppo_cfg:D9RoughPPORunnerEasyCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_rough_ppo_cfg.yaml",
     },
 )
@@ -40,8 +40,8 @@ gym.register(
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.flat_env_cfg:D9FlatEnvEasyCfg",
-        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:D9FlatPPORunnerCfg",
+        "env_cfg_entry_point": f"{__name__}.flat_env_easy_cfg:D9FlatEnvEasyCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.d9_rsl_rl_ppo_cfg:D9FlatPPORunnerEasyCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_flat_ppo_cfg.yaml",
     },
 )
@@ -52,8 +52,8 @@ gym.register(
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.flat_env_cfg:D9FlatEnvEasyCfg_PLAY",
-        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:D9FlatPPORunnerCfg",
+        "env_cfg_entry_point": f"{__name__}.flat_env_easy_cfg:D9FlatEnvEasyCfg_PLAY",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.d9_rsl_rl_ppo_cfg:D9FlatPPORunnerEasyCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_flat_ppo_cfg.yaml",
     },
 )

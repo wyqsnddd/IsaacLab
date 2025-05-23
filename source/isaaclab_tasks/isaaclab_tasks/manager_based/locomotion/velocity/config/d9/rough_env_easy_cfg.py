@@ -71,6 +71,36 @@ class D9Rewards:
         },
     )
 
+    dof_torques_l2 = RewTerm(
+        func=mdp.joint_torques_l2,
+        weight=-1.0e-5,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"]
+            )
+        },
+    )
+
+    dof_vel_l2 = RewTerm(
+        func=mdp.joint_vel_l2,
+        weight=-0.005,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"]
+            )
+        },
+    )
+
+    dof_acc_l2 = RewTerm(
+        func=mdp.joint_acc_l2,
+        weight=-2.5e-7,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"]
+            )
+        },
+    )
+
     # Penalize ankle joint limits
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
@@ -82,7 +112,7 @@ class D9Rewards:
         },
     )
 
-    joint_deviation_hip_2 = RewTerm(
+    joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l2,
         weight=-0.1,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_Yaw", ".*_Hip_Joint_Roll"])},
@@ -90,7 +120,7 @@ class D9Rewards:
 
 
 @configclass
-class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
+class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
     rewards: D9Rewards = D9Rewards()
 
     def __post_init__(self):
@@ -120,27 +150,6 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
             },
         }
 
-        # Rewards
-        self.rewards.dof_acc_l2.weight = -2.5e-7
-        self.rewards.dof_acc_l2.params["asset_cfg"] = SceneEntityCfg(
-            "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"]
-        )
-
-        self.rewards.dof_torques_l2.weight = -1.0e-5
-        self.rewards.dof_torques_l2.params["asset_cfg"] = SceneEntityCfg(
-            "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"]
-        )
-
-        dof_vel_l2 = RewTerm(  # noqa F841
-            func=mdp.joint_vel_l2,
-            weight=-0.005,
-            params={
-                "asset_cfg": SceneEntityCfg(
-                    "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"]
-                )
-            },
-        )
-
         # Commands
         self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
@@ -153,7 +162,7 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
 
 
 @configclass
-class D9RoughEnvCfg_PLAY(D9RoughEnvCfg):
+class D9RoughEnvEasyCfg_PLAY(D9RoughEnvEasyCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
