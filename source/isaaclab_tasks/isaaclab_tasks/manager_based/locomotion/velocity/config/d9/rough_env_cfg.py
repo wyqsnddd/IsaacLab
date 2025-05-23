@@ -268,7 +268,12 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
 
         # terminations
-        self.terminations.base_contact.params["sensor_cfg"].body_names = ["base_link", "Waist_Yaw", ".*_Hip_.*"]
+        self.terminations.base_contact.params["sensor_cfg"].body_names = [
+            "base_link",
+            "Waist_Yaw",
+            ".*_Hip_.*",
+            ".*_Knee_Pitch",
+        ]
 
         # Add illegal contact termination
         self.terminations.illegal_contact = TerminationTermCfg(
@@ -284,7 +289,8 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.terminations.bad_orientation = TerminationTermCfg(
             func=mdp.bad_orientation,
             params={
-                "limit_angle": 0.436,  # Limit angle in radians (approximately 25 degrees)
+                # "limit_angle": 0.436,  # Limit angle in radians (approximately 25 degrees)
+                "limit_angle": 1.0,  # Limit angle in radians (approximately 57 degrees)
                 "asset_cfg": SceneEntityCfg("robot", body_names=["base_link", "Waist_Yaw"]),
             },
             time_out=False,
