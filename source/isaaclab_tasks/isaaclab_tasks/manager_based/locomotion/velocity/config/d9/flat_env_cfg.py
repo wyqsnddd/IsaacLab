@@ -23,11 +23,13 @@ class D9FlatEnvCfg(D9RoughEnvCfg):
         # no terrain curriculum
         self.curriculum.terrain_levels = None
         self.rewards.gait_reward.weight = 0.5
+        self.rewards.phase_contact_reward.weight = 1
+        self.rewards.contact_no_velocity_penalty.weight = -0.005
         self.rewards.air_time_variance_penalty.weight = -0.5
-        self.rewards.base_height.weight = -0.5
+        self.rewards.base_height.weight = -2.0
         self.rewards.feet_swing_height.weight = -0.1
         self.rewards.track_lin_vel_xy_exp.weight = 1.5
-        self.rewards.track_ang_vel_z_exp.weight = 1.6
+        self.rewards.track_ang_vel_z_exp.weight = 1.0
         self.rewards.lin_vel_z_l2.weight = -0.2
         self.rewards.ang_vel_xy_l2.weight = -0.05
         self.rewards.dof_torques_l2.weight = -1e-05

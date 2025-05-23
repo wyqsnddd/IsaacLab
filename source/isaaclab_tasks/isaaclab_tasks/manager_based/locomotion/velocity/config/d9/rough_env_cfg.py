@@ -20,6 +20,7 @@ from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards impo
     biped_gait_reward,
     contact_no_velocity_penalty,
     phase_based_contact_reward,
+    utils_no_fly,
 )
 from isaaclab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityRoughEnvCfg, RewardsCfg
 
@@ -50,6 +51,13 @@ class D9Rewards(RewardsCfg):
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
             "threshold": 0.4,
         },
+    )
+    no_fly = RewTerm(
+        func=utils_no_fly,
+        weight=0.25,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Link_Ankle_Roll"),
+        },  # W: Trailing whitespace
     )
 
     # Add air time variance penalty
@@ -130,12 +138,17 @@ class D9Rewards(RewardsCfg):
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
         weight=-1.0,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Ankle_Joint_Pitch", ".*_Ankle_Joint_Roll"])},
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_Pitch", ".*_Ankle_Joint_Roll"],
+            )
+        },
     )
 
     # Penalize deviation from default of the joints that are not essential for locomotion
     joint_deviation_hip = RewTerm(
-        func=mdp.joint_deviation_l1,
+        func=mdp.joint_deviation_l2,
         weight=-0.1,
         params={
             "asset_cfg": SceneEntityCfg(
