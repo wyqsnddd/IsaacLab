@@ -10,6 +10,7 @@
 # from isaaclab_assets import G1_MINIMAL_CFG  # isort: skip
 from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_12DOF_CFG, PUDU_D9_21DOF_CFG  # noqa F401
 
+from isaaclab.managers import EventTermCfg as EventTerm
 from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg, TerminationTermCfg
 from isaaclab.utils import configclass
@@ -241,7 +242,13 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/torso_link"
 
         # Randomization
-        self.events.push_robot = None
+        self.events.push_robot = EventTerm(
+            func=mdp.push_by_setting_velocity,
+            mode="interval",
+            interval_range_s=(10.0, 15.0),
+            params={"velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)}},
+        )
+
         self.events.add_base_mass = None
         self.events.reset_robot_joints.params["position_range"] = (1.0, 1.0)
         self.events.base_external_force_torque.params["asset_cfg"].body_names = ["Waist_Yaw"]
