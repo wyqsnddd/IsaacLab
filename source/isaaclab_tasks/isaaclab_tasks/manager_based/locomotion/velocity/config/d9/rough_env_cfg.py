@@ -238,7 +238,7 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         super().__post_init__()
         # Scene
         self.scene.robot = PUDU_D9_21DOF_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
-        self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/Waist_Yaw"
+        self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
         # self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/torso_link"
 
         # Randomization
@@ -251,7 +251,7 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
 
         self.events.add_base_mass = None
         self.events.reset_robot_joints.params["position_range"] = (1.0, 1.0)
-        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["Waist_Yaw"]
+        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
         self.events.reset_base.params = {
             "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
             "velocity_range": {
@@ -291,6 +291,7 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
             "base_link",
             "Waist_Yaw",
+            "base_link",
             ".*_Hip_.*",
             ".*_Knee_Pitch",
         ]
