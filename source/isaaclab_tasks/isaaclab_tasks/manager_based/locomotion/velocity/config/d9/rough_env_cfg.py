@@ -242,6 +242,9 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/torso_link"
 
         # Randomization
+        self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 3.0)
+        self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
+
         self.events.push_robot = EventTerm(
             func=mdp.push_by_setting_velocity,
             mode="interval",
@@ -291,7 +294,6 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
             "base_link",
             "Waist_Yaw",
-            "base_link",
             ".*_Hip_.*",
             ".*_Knee_Pitch",
         ]
