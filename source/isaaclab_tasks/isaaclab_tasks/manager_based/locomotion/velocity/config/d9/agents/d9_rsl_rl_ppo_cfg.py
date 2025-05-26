@@ -3,9 +3,134 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import torch
+
 from isaaclab.utils import configclass
 
-from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, RslRlPpoAlgorithmCfg
+from isaaclab_rl.rsl_rl import (  # noqa F401
+    RslRlOnPolicyRunnerCfg,
+    RslRlPpoActorCriticCfg,
+    RslRlPpoAlgorithmCfg,
+    RslRlSymmetryCfg,
+)
+
+
+def d9_leg_symmetry_augmentation(env, obs, actions, obs_type="policy"):
+    """D9机器人腿部对称性数据增强函数"""
+    # 添加详细的调试信息
+    print(f"\n=== Symmetry Augmentation Debug Info ===")  # noqa F541
+    print(f"obs_type: {obs_type}")
+    print(f"obs shape: {obs.shape if obs is not None else 'None'}")
+    print(f"actions shape: {actions.shape if actions is not None else 'None'}")
+
+    # 根据obs_type处理不同的情况
+    if obs_type == "critic":
+        # critic只需要处理obs，不需要处理actions
+        if obs is None:
+            return None, None
+        # 对于critic，我们仍然需要返回镜像的obs以计算对称性损失
+        mirrored_obs = obs.clone()
+        # 定义关节的对称变换系数
+        joint_multipliers = {
+            # 左腿关节
+            0: -1.0,  # Left_Hip_Joint_Roll
+            1: -1.0,  # Left_Hip_Joint_Yaw
+            2: 1.0,  # Left_Hip_Joint_Pitch
+            3: 1.0,  # Left_Knee_Joint_Pitch
+            4: 1.0,  # Left_Ankle_Joint_Pitch
+            5: -1.0,  # Left_Ankle_Joint_Roll
+            # 右腿关节
+            6: -1.0,  # Right_Hip_Joint_Roll
+            7: -1.0,  # Right_Hip_Joint_Yaw
+            8: 1.0,  # Right_Hip_Joint_Pitch
+            9: 1.0,  # Right_Knee_Joint_Pitch
+            10: 1.0,  # Right_Ankle_Joint_Pitch
+            11: -1.0,  # Right_Ankle_Joint_Roll
+        }
+
+        # 对每个关节应用对称变换
+        for i in range(12):  # D9有12个关节
+            if i in joint_multipliers:
+                # 处理观察值中的关节位置和速度
+                mirrored_obs[:, i] = obs[:, i] * joint_multipliers[i]  # 关节位置
+                mirrored_obs[:, i + 12] = obs[:, i + 12] * joint_multipliers[i]  # 关节速度
+
+        return mirrored_obs, None
+
+    # 对于policy类型，需要同时处理obs和actions
+    if obs is None or actions is None:
+        # 如果任一为None，返回None以触发框架的默认处理
+        return None, None
+
+    # 检查输入类型
+    if not isinstance(obs, torch.Tensor) or not isinstance(actions, torch.Tensor):
+        return None, None
+
+    # 打印输入统计信息
+    try:
+        print(f"Input obs - mean: {obs.mean():.4f}, std: {obs.std():.4f}, min: {obs.min():.4f}, max: {obs.max():.4f}")
+        print(
+            f"Input actions - mean: {actions.mean():.4f}, std: {actions.std():.4f}, min: {actions.min():.4f}, max: {actions.max():.4f}"
+        )
+    except Exception as e:
+        print(f"Warning: Error printing statistics: {e}")
+
+    # 添加数值检查
+    if torch.isnan(actions).any() or torch.isinf(actions).any():
+        print("Warning: Input actions contain NaN or Inf values")
+        return None, None
+
+    # 定义关节的对称变换系数
+    joint_multipliers = {
+        # 左腿关节
+        0: -1.0,  # Left_Hip_Joint_Roll
+        1: -1.0,  # Left_Hip_Joint_Yaw
+        2: 1.0,  # Left_Hip_Joint_Pitch
+        3: 1.0,  # Left_Knee_Joint_Pitch
+        4: 1.0,  # Left_Ankle_Joint_Pitch
+        5: -1.0,  # Left_Ankle_Joint_Roll
+        # 右腿关节
+        6: -1.0,  # Right_Hip_Joint_Roll
+        7: -1.0,  # Right_Hip_Joint_Yaw
+        8: 1.0,  # Right_Hip_Joint_Pitch
+        9: 1.0,  # Right_Knee_Joint_Pitch
+        10: 1.0,  # Right_Ankle_Joint_Pitch
+        11: -1.0,  # Right_Ankle_Joint_Roll
+    }
+
+    # 创建镜像观察值和动作
+    mirrored_obs = obs.clone()
+    mirrored_actions = actions.clone()
+
+    # 对每个关节应用对称变换
+    for i in range(12):  # D9有12个关节
+        if i in joint_multipliers:
+            # 处理动作
+            mirrored_actions[:, i] = actions[:, i] * joint_multipliers[i]
+
+            # 处理观察值中的关节位置和速度
+            # 假设观察值中关节位置和速度的索引与动作索引对应
+            mirrored_obs[:, i] = obs[:, i] * joint_multipliers[i]  # 关节位置
+            mirrored_obs[:, i + 12] = obs[:, i + 12] * joint_multipliers[i]  # 关节速度
+
+    # 检查输出是否有效
+    if torch.isnan(mirrored_actions).any() or torch.isinf(mirrored_actions).any():
+        print("Warning: Output actions contain NaN or Inf values")
+        return None, None
+
+    # 打印输出统计信息
+    try:
+        print(
+            f"Output obs - mean: {mirrored_obs.mean():.4f}, std: {mirrored_obs.std():.4f}, min: {mirrored_obs.min():.4f}, max: {mirrored_obs.max():.4f}"
+        )
+        print(
+            f"Output actions - mean: {mirrored_actions.mean():.4f}, std: {mirrored_actions.std():.4f}, min: {mirrored_actions.min():.4f}, max: {mirrored_actions.max():.4f}"
+        )
+    except Exception as e:
+        print(f"Warning: Error printing output statistics: {e}")
+
+    print("=== End of Symmetry Augmentation ===\n")
+    return mirrored_obs, mirrored_actions
 
 
 @configclass
@@ -34,6 +159,12 @@ class D9RoughPPORunnerEasyCfg(RslRlOnPolicyRunnerCfg):
         lam=0.95,
         desired_kl=0.01,
         max_grad_norm=1.0,
+        # symmetry_cfg=RslRlSymmetryCfg(
+        #     use_data_augmentation=True,
+        #     use_mirror_loss=False,
+        #     mirror_loss_coeff=0.02,
+        #     data_augmentation_func=d9_leg_symmetry_augmentation
+        # )
     )
 
 
