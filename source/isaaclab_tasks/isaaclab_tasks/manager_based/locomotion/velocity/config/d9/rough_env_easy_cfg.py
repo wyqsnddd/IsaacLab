@@ -60,6 +60,19 @@ class D9Rewards:
         },
     )
 
+    # Add phase-based contact reward
+    phase_contact_reward = RewTerm(
+        func=phase_based_contact_reward,
+        weight=1.0,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "period": 0.8,
+            "offset": 0.5,
+            "std": 0.1,
+            "force_threshold": 1.0,
+        },
+    )
+
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-1.0)
 
     base_height = RewTerm(
