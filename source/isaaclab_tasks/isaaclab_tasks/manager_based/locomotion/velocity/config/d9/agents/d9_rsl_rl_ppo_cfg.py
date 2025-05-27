@@ -18,7 +18,7 @@ from isaaclab_rl.rsl_rl import (  # noqa F401
 def d9_leg_symmetry_augmentation(env, obs, actions, obs_type="policy"):
     """D9机器人腿部对称性数据增强函数"""
     # 添加详细的调试信息
-    print(f"\n=== Symmetry Augmentation Debug Info ===")  # noqa F541
+    print(f"\n=== Symmetry Augmentation Debug Info ===")  # noaq F541
     print(f"obs_type: {obs_type}")
     print(f"obs shape: {obs.shape if obs is not None else 'None'}")
     print(f"actions shape: {actions.shape if actions is not None else 'None'}")
@@ -55,20 +55,27 @@ def d9_leg_symmetry_augmentation(env, obs, actions, obs_type="policy"):
                 mirrored_obs[:, i] = obs[:, i] * joint_multipliers[i]  # 关节位置
                 mirrored_obs[:, i + 12] = obs[:, i + 12] * joint_multipliers[i]  # 关节速度
 
+        # 检查输出是否有效
+        if torch.isnan(mirrored_obs).any() or torch.isinf(mirrored_obs).any():
+            print("Warning: Output obs contain NaN or Inf values")
+            return None, None
+
         return mirrored_obs, None
 
-    # 对于policy类型，需要同时处理obs和actions
-    if obs is None or actions is None:
-        # 如果任一为None，返回None以触发框架的默认处理
+    # 对于policy类型，需要处理actions，obs可以为None
+    if actions is None:
         return None, None
 
     # 检查输入类型
-    if not isinstance(obs, torch.Tensor) or not isinstance(actions, torch.Tensor):
+    if not isinstance(actions, torch.Tensor):
         return None, None
 
     # 打印输入统计信息
     try:
-        print(f"Input obs - mean: {obs.mean():.4f}, std: {obs.std():.4f}, min: {obs.min():.4f}, max: {obs.max():.4f}")
+        if obs is not None:
+            print(
+                f"Input obs - mean: {obs.mean():.4f}, std: {obs.std():.4f}, min: {obs.min():.4f}, max: {obs.max():.4f}"
+            )
         print(
             f"Input actions - mean: {actions.mean():.4f}, std: {actions.std():.4f}, min: {actions.min():.4f}, max: {actions.max():.4f}"
         )
@@ -99,7 +106,7 @@ def d9_leg_symmetry_augmentation(env, obs, actions, obs_type="policy"):
     }
 
     # 创建镜像观察值和动作
-    mirrored_obs = obs.clone()
+    mirrored_obs = obs.clone() if obs is not None else None
     mirrored_actions = actions.clone()
 
     # 对每个关节应用对称变换
@@ -108,21 +115,26 @@ def d9_leg_symmetry_augmentation(env, obs, actions, obs_type="policy"):
             # 处理动作
             mirrored_actions[:, i] = actions[:, i] * joint_multipliers[i]
 
-            # 处理观察值中的关节位置和速度
-            # 假设观察值中关节位置和速度的索引与动作索引对应
-            mirrored_obs[:, i] = obs[:, i] * joint_multipliers[i]  # 关节位置
-            mirrored_obs[:, i + 12] = obs[:, i + 12] * joint_multipliers[i]  # 关节速度
+            # 如果obs不为None，处理观察值中的关节位置和速度
+            if mirrored_obs is not None:
+                mirrored_obs[:, i] = obs[:, i] * joint_multipliers[i]  # 关节位置
+                mirrored_obs[:, i + 12] = obs[:, i + 12] * joint_multipliers[i]  # 关节速度
 
     # 检查输出是否有效
     if torch.isnan(mirrored_actions).any() or torch.isinf(mirrored_actions).any():
         print("Warning: Output actions contain NaN or Inf values")
         return None, None
 
+    if mirrored_obs is not None and (torch.isnan(mirrored_obs).any() or torch.isinf(mirrored_obs).any()):
+        print("Warning: Output obs contain NaN or Inf values")
+        return None, None
+
     # 打印输出统计信息
     try:
-        print(
-            f"Output obs - mean: {mirrored_obs.mean():.4f}, std: {mirrored_obs.std():.4f}, min: {mirrored_obs.min():.4f}, max: {mirrored_obs.max():.4f}"
-        )
+        if mirrored_obs is not None:
+            print(
+                f"Output obs - mean: {mirrored_obs.mean():.4f}, std: {mirrored_obs.std():.4f}, min: {mirrored_obs.min():.4f}, max: {mirrored_obs.max():.4f}"
+            )
         print(
             f"Output actions - mean: {mirrored_actions.mean():.4f}, std: {mirrored_actions.std():.4f}, min: {mirrored_actions.min():.4f}, max: {mirrored_actions.max():.4f}"
         )
@@ -161,8 +173,8 @@ class D9RoughPPORunnerEasyCfg(RslRlOnPolicyRunnerCfg):
         max_grad_norm=1.0,
         # symmetry_cfg=RslRlSymmetryCfg(
         #     use_data_augmentation=True,
-        #     use_mirror_loss=False,
-        #     mirror_loss_coeff=0.02,
+        #     # use_mirror_loss=True,
+        #     # mirror_loss_coeff=0.001,  # 使用更小的系数
         #     data_augmentation_func=d9_leg_symmetry_augmentation
         # )
     )
