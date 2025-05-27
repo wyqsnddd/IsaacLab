@@ -35,17 +35,17 @@ class D9Rewards:
     alive = RewTerm(func=mdp.is_alive, weight=0.0)
 
     track_lin_vel_xy_exp = RewTerm(
-        func=mdp.track_lin_vel_xy_yaw_frame_exp,
+        func=mdp.track_lin_vel_xy_exp,
         weight=1.0,
-        params={"command_name": "base_velocity", "std": 0.25},
+        params={"command_name": "base_velocity", "std": 0.5},
     )
 
     track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_world_exp, weight=0.5, params={"command_name": "base_velocity", "std": 0.25}
+        func=mdp.track_ang_vel_z_exp, weight=0.5, params={"command_name": "base_velocity", "std": 0.5}
     )
 
     feet_air_time = RewTerm(
-        func=mdp.feet_air_time_positive_biped,
+        func=mdp.feet_air_time,
         weight=3.0,
         params={
             "command_name": "base_velocity",
