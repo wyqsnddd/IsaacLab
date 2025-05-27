@@ -66,7 +66,3 @@ datasets
 
 
 source/isaaclab_assets/isaaclab_assets/external_assets/*
-!source/isaaclab_assets/isaaclab_assets/external_assets/assets/pudu_d9.py
-logs/*
-!logs/rsl_rl/d9_flat/2025-05-26_15-46-32/model_1200.pt
-!logs/rsl_rl/d9_flat/2025-05-26_15-46-32/events.out.tfevents.1748245608.ecechen-LC1.8562.0
