@@ -19,7 +19,7 @@ if [ -z "$gpu_id" ] || [ -z "$run_count" ] || [ -z "$log_file" ]; then
 fi
 
 # 配置文件路径
-CONFIG_FILE="source/isaaclab_tasks/isaaclab_tasks/manager_based/locomotion/velocity/config/d9/flat_env_cfg.py"
+CONFIG_FILE="source/isaaclab_tasks/isaaclab_tasks/manager_based/locomotion/velocity/config/d9/flat_env_easy_cfg.py"
 PARAM_FILE="training-${run_count}.yaml"
 
 # 检查参数文件是否存在
@@ -61,10 +61,10 @@ echo "所有权重已修改完成"
 
 # 启动训练任务
 echo "[$(date +'%F %T')] 启动训练任务..."
-echo "执行命令: ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py --task Isaac-Velocity-Flat-D9-v0 --headless --num_envs 4096 --video --video_length 200 --video_interval 1000 --device cuda:$gpu_id"
+echo "执行命令: ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py --task Isaac-Velocity-Flat-D9-v1 --headless --num_envs 4096 --video --video_length 200 --video_interval 1000 --device cuda:$gpu_id"
 
 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py \
-    --task Isaac-Velocity-Flat-D9-v0 \
+    --task Isaac-Velocity-Flat-D9-v1 \
     --headless \
     --num_envs 4096 \
     --video --video_length 200 --video_interval 1000 \

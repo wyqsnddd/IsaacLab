@@ -23,6 +23,19 @@ class D9FlatEnvEasyCfg(D9RoughEnvEasyCfg):
         # no terrain curriculum
         self.curriculum.terrain_levels = None
 
+        # Echo the default weights
+        self.rewards.track_lin_vel_xy_exp.weight = 1.0
+        self.rewards.track_ang_vel_z_exp.weight = 0.5
+        self.rewards.feet_air_time.weight = 3.0
+        self.rewards.no_fly.weight = 0.25
+        self.rewards.phase_contact_reward.weight = 1.0
+        self.rewards.flat_orientation_l2.weight = -1.0
+        self.rewards.base_height.weight = -5.0
+        # self.rewards.feet_slide.weight = -0.25
+        # self.rewards.contact_no_velocity_penalty.weight = -0.005
+        # self.rewards.air_time_variance_penalty.weight = -0.5
+        # self.rewards.feet_swing_height.weight = -0.1
+
 
 class D9FlatEnvEasyCfg_PLAY(D9FlatEnvEasyCfg):
     def __post_init__(self) -> None:

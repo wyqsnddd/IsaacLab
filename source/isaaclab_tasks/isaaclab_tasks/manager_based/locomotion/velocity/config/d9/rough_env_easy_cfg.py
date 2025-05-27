@@ -32,6 +32,8 @@ from isaaclab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import ( 
 class D9Rewards:
     """Reward terms for the MDP."""
 
+    alive = RewTerm(func=mdp.is_alive, weight=0.0)
+
     track_lin_vel_xy_exp = RewTerm(
         func=mdp.track_lin_vel_xy_yaw_frame_exp,
         weight=1.0,
