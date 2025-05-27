@@ -145,33 +145,33 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
         # self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/torso_link"
 
         # Randomization
-        self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 3.0)
-        self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
+        # self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 3.0)
+        self.events.add_base_mass.params["asset_cfg"].body_names = ["Waist_Yaw"]
 
-        self.events.reset_robot_joints.params["position_range"] = (0.9, 1.1)
-        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
+        # self.events.reset_robot_joints.params["position_range"] = (0.9, 1.1)
+        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["Waist_Yaw"]
 
-        self.events.reset_base.params = {
-            "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
-            "velocity_range": {
-                "x": (0.0, 0.0),
-                "y": (0.0, 0.0),
-                "z": (0.0, 0.0),
-                "roll": (0.0, 0.0),
-                "pitch": (0.0, 0.0),
-                "yaw": (0.0, 0.0),
-            },
-        }
+        # self.events.reset_base.params = {
+        #     "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
+        #     "velocity_range": {
+        #         "x": (0.0, 0.0),
+        #         "y": (0.0, 0.0),
+        #         "z": (0.0, 0.0),
+        #         "roll": (0.0, 0.0),
+        #         "pitch": (0.0, 0.0),
+        #         "yaw": (0.0, 0.0),
+        #     },
+        # }
 
         # Commands
-        self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
-        self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
-        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
-        self.commands.base_velocity.ranges.heading = (-3.14, 3.14)
+        # self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
+        # self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
+        # self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+        # self.commands.base_velocity.ranges.heading = (-3.14, 3.14)
 
         # terminations
         self.actions.joint_pos.scale = 0.25
-        self.terminations.base_contact.params["sensor_cfg"].body_names = ["base_link"]
+        self.terminations.base_contact.params["sensor_cfg"].body_names = ["Waist_Yaw"]
 
 
 @configclass
