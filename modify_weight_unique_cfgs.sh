@@ -61,12 +61,12 @@ echo "所有权重已修改完成"
 
 # 启动训练任务
 echo "[$(date +'%F %T')] 启动训练任务..."
-echo "执行命令: ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py --task Isaac-Velocity-Flat-D9-v1 --headless --num_envs 4096 --video --video_length 200 --video_interval 1000 --device cuda:$gpu_id"
+echo "执行命令: ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py --task Isaac-Velocity-Flat-D9-v1 --headless --num_envs 8192 --video --video_length 200 --video_interval 1000 --device cuda:$gpu_id"
 
 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py \
     --task Isaac-Velocity-Flat-D9-v1 \
     --headless \
-    --num_envs 4096 \
+    --num_envs 8192 \
     --video --video_length 200 --video_interval 1000 \
     --device "cuda:$gpu_id" \
     > "$log_file" 2>&1 &
