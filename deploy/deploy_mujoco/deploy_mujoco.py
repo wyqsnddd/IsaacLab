@@ -110,7 +110,12 @@ if __name__ == "__main__":
                 dqj = dqj * dof_vel_scale
                 gravity_orientation = get_gravity_orientation(quat)
                 omega = omega * ang_vel_scale
-                velocity =  d.qvel[0:3] * vel_scale
+                
+                v_world =  d.qvel[0:3]
+                R = np.empty((3, 3))
+                mujoco.mju_quat2Mat(R.ravel(), quat)
+                v_b = R.T @ v_world 
+                velocity = v_b * vel_scale
 
                 obs[:3] = velocity
                 obs[3:6] = omega
