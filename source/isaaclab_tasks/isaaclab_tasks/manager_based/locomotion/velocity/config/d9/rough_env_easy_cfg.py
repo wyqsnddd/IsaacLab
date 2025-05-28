@@ -65,7 +65,7 @@ class D9Rewards:
     # Add phase-based contact reward
     phase_contact_reward = RewTerm(
         func=phase_based_contact_reward,
-        weight=1.0,
+        weight=0.0,
         params={
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
             "period": 0.8,
