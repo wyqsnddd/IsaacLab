@@ -11,7 +11,7 @@
 from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_12DOF_UPDATED_ACTUATOR_CFG  # noqa F401
 
 from isaaclab.managers import RewardTermCfg as RewTerm
-from isaaclab.managers import SceneEntityCfg
+from isaaclab.managers import SceneEntityCfg, TerminationTermCfg
 from isaaclab.utils import configclass
 
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as mdp
@@ -72,6 +72,57 @@ class D9Rewards:
             "offset": 0.5,
             "std": 0.1,
             "force_threshold": 1.0,
+        },
+    )
+    # Add contact no velocity penalty
+    contact_no_velocity_penalty = RewTerm(
+        func=contact_no_velocity_penalty,
+        weight=0.0,  # Negative weight since this is a penalty
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_Ankle_Roll"),
+            "force_threshold": 1.0,
+        },
+    )
+
+    feet_swing_height = RewTerm(
+        func=mdp.feet_swing_height,
+        weight=0.0,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_Ankle_Roll"),
+            "target_height": 0.12,
+        },
+    )
+
+    feet_slide = RewTerm(
+        func=mdp.feet_slide,
+        weight=-0.0,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_Ankle_Roll"),
+        },
+    )
+    # Add air time variance penalty
+    air_time_variance_penalty = RewTerm(
+        func=air_time_variance_penalty,
+        weight=-0.0,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "std": 0.1,
+        },
+    )
+
+    # Add gait reward for bipedal walking
+    gait_reward = RewTerm(
+        func=biped_gait_reward,
+        weight=0.0,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_Ankle_Roll"),
+            "std": 0.1,
+            "max_err": 0.2,
+            "velocity_threshold": 0.1,
         },
     )
 
@@ -160,7 +211,7 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.no_fly.weight = 0.25
         self.rewards.flat_orientation_l2.weight = -1.0
         self.rewards.base_height.weight = -5.0
-        self.phase_contact_reward.weight = 1.0
+        self.rewards.phase_contact_reward.weight = 1.0
         self.rewards.feet_slide.weight = -0.0
         self.rewards.contact_no_velocity_penalty.weight = -0.0
         self.rewards.air_time_variance_penalty.weight = -0.0
