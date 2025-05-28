@@ -153,6 +153,19 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
         # self.events.reset_robot_joints.params["position_range"] = (0.9, 1.1)
         self.events.base_external_force_torque.params["asset_cfg"].body_names = ["Waist_Yaw"]
 
+        # Echo the default weights
+        self.rewards.track_lin_vel_xy_exp.weight = 1.0
+        self.rewards.track_ang_vel_z_exp.weight = 0.5
+        self.rewards.feet_air_time.weight = 3.0
+        self.rewards.no_fly.weight = 0.25
+        self.rewards.flat_orientation_l2.weight = -1.0
+        self.rewards.base_height.weight = -5.0
+        self.phase_contact_reward.weight = 1.0
+        self.rewards.feet_slide.weight = -0.0
+        self.rewards.contact_no_velocity_penalty.weight = -0.0
+        self.rewards.air_time_variance_penalty.weight = -0.0
+        self.rewards.feet_swing_height.weight = -0.0
+
         # self.events.reset_base.params = {
         #     "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
         #     "velocity_range": {
@@ -173,7 +186,22 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
 
         # terminations
         self.actions.joint_pos.scale = 0.25
-        self.terminations.base_contact.params["sensor_cfg"].body_names = ["Waist_Yaw"]
+        self.terminations.base_contact.params["sensor_cfg"].body_names = [
+            "Waist_Yaw",
+            ".*_Hip_.*",
+            ".*_Knee_Pitch",
+        ]
+
+        # Add bad orientation termination
+        self.terminations.bad_orientation = TerminationTermCfg(
+            func=mdp.bad_orientation,
+            params={
+                # "limit_angle": 0.436,  # Limit angle in radians (approximately 25 degrees)
+                "limit_angle": 1.0,  # Limit angle in radians (approximately 57 degrees)
+                "asset_cfg": SceneEntityCfg("robot", body_names=["base_link", "Waist_Yaw"]),
+            },
+            time_out=False,
+        )
 
 
 @configclass
