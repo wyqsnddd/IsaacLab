@@ -42,7 +42,7 @@ class D9FlatEnvEasyCfg(D9RoughEnvEasyCfg):
         self.rewards.track_ang_vel_z_exp.weight = 0.5
         self.rewards.feet_air_time.weight = 3.0
         self.rewards.no_fly.weight = 0.25
-        self.curriculum.phase_contact_reward.weight = 0.0
+        self.rewards.phase_contact_reward.weight = 0.0
         self.rewards.flat_orientation_l2.weight = -1.0
         self.rewards.base_height.weight = -5.0
         # self.rewards.feet_slide.weight = -0.25
