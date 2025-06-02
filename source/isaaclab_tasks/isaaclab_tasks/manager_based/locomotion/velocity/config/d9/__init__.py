@@ -24,6 +24,40 @@ gym.register(
 
 
 gym.register(
+    id="Isaac-Velocity-Running-D9-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.running_env_cfg:D9RunningEnvCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.d9_rsl_rl_ppo_cfg:D9FlatPPORunnerEasyCfg",
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_flat_ppo_cfg.yaml",
+    },
+)
+
+
+gym.register(
+    id="Isaac-Velocity-Running-D9-Play-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.running_env_cfg:D9RunningEnvCfg_PLAY",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.d9_rsl_rl_ppo_cfg:D9FlatPPORunnerEasyCfg",
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_flat_ppo_cfg.yaml",
+    },
+)
+gym.register(
+    id="Isaac-Velocity-Rough-D9-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.rough_env_cfg:D9RoughEnvCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:D9RoughPPORunnerCfg",
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_rough_ppo_cfg.yaml",
+    },
+)
+
+
+gym.register(
     id="Isaac-Velocity-Rough-D9-Play-v1",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
