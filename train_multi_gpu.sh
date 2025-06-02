@@ -88,6 +88,8 @@ while true; do
     # 如果等待所有GPU且还有未使用的GPU，继续监控
     if [ "$WAIT_ALL_GPUS" = true ] && (( used_count < total_gpus )); then
         sleep $MONITOR_INTERVAL
+    elif (( used_count >= total_gpus )); then
+        break;
     else
         # 如果不等待所有GPU，检查是否还有可用的GPU
         available_gpus=0

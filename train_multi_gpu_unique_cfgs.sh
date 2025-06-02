@@ -80,8 +80,10 @@ while true; do
     # 如果等待所有GPU且还有未使用的GPU，继续监控
     if [ "$WAIT_ALL_GPUS" = true ] && (( used_count < total_gpus )); then
         sleep $MONITOR_INTERVAL
+    elif (( used_count >= total_gpus )); then
+        break
     else
-        # 如果不等待所有GPU，检查是否还有可用的GPU
+        # Check for available GPUs if not waiting for all GPUs
         available_gpus=0
         while IFS=',' read -r gpu_id utilization; do
             if [[ -z "${used_gpus[$gpu_id]}" ]] && (( utilization < 10 )); then
@@ -90,7 +92,7 @@ while true; do
         done <<< "$gpu_utils"
 
         if (( available_gpus == 0 )); then
-            echo "[$(date +'%F %T')] 没有更多可用的GPU，监控结束。"
+            echo "[$(date +'%F %T')] No more available GPUs, monitoring ended."
             break
         fi
         sleep $MONITOR_INTERVAL
