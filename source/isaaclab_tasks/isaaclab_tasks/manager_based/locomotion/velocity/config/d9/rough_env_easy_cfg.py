@@ -17,8 +17,10 @@ from isaaclab.utils import configclass
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as mdp
 from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards import (  # noqa F401
     air_time_variance_penalty,
+    alternating_air_time_reward,
     biped_gait_reward,
     contact_no_velocity_penalty,
+    energy_efficiency_reward,
     phase_based_contact_reward,
     utils_no_fly,
 )
@@ -42,6 +44,36 @@ class D9Rewards:
 
     track_ang_vel_z_exp = RewTerm(
         func=mdp.track_ang_vel_z_exp, weight=0.5, params={"command_name": "base_velocity", "std": 0.5}
+    )
+
+    # Rewards for running
+    feet_air_time_biped = RewTerm(
+        func=mdp.feet_air_time_positive_biped,
+        weight=0.0,
+        params={
+            "command_name": "base_velocity",
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "threshold": 0.1,
+        },
+    )
+
+    alternating_air_time = RewTerm(
+        func=alternating_air_time_reward,
+        weight=0.0,  # 较高的权重以强调交替步态
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "period": 0.6,  # 0.6秒的步态周期
+            "std": 0.3,  # 较小的标准差使奖励更敏感
+            "force_threshold": 10.0,  # 接触力阈值
+        },
+    )
+    # 能量效率奖励
+    energy_efficiency = RewTerm(
+        func=energy_efficiency_reward,
+        weight=0.1,
+        params={
+            "asset_cfg": SceneEntityCfg("robot"),
+        },
     )
 
     feet_air_time = RewTerm(
