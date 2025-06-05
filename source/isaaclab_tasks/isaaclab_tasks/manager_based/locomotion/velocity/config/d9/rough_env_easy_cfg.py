@@ -36,13 +36,15 @@ class D9Rewards:
 
     track_lin_vel_xy_exp = RewTerm(
         func=mdp.track_lin_vel_xy_exp,
-        weight=1.0,
+        weight=2.4,
         params={"command_name": "base_velocity", "std": 0.5},
     )
 
     track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_exp, weight=0.5, params={"command_name": "base_velocity", "std": 0.5}
+        func=mdp.track_ang_vel_z_exp, weight=1.6, params={"command_name": "base_velocity", "std": 0.4}
     )
+
+    ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.0)
 
     feet_air_time = RewTerm(
         func=mdp.feet_air_time,
@@ -70,7 +72,7 @@ class D9Rewards:
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
             "period": 0.8,
             "offset": 0.5,
-            "std": 0.1,
+            "std": 0.5,
             "force_threshold": 1.0,
         },
     )
@@ -184,6 +186,7 @@ class D9Rewards:
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_Yaw", ".*_Hip_Joint_Roll"])},
     )
 
+    action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.0)
 
 @configclass
 class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
@@ -205,8 +208,9 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
         self.events.base_external_force_torque.params["asset_cfg"].body_names = ["Waist_Yaw"]
 
         # Echo the default weights
-        self.rewards.track_lin_vel_xy_exp.weight = 1.0
-        self.rewards.track_ang_vel_z_exp.weight = 0.5
+        self.rewards.alive = 2.0
+        self.rewards.track_lin_vel_xy_exp.weight = 2.4
+        self.rewards.track_ang_vel_z_exp.weight = 1.6
         self.rewards.feet_air_time.weight = 3.0
         self.rewards.no_fly.weight = 0.25
         self.rewards.flat_orientation_l2.weight = -1.0
@@ -216,6 +220,9 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.contact_no_velocity_penalty.weight = -0.0
         self.rewards.air_time_variance_penalty.weight = -0.0
         self.rewards.feet_swing_height.weight = -0.0
+        self.reward.ang_vel_xy_l2.weight = -0.0
+        self.rewards.joint_deviation_hip = -0.1
+        self.rewards.action_rate_l2.weight = -0.0
 
         # self.events.reset_base.params = {
         #     "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
@@ -241,6 +248,7 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
             "Waist_Yaw",
             ".*_Hip_.*",
             ".*_Knee_Pitch",
+            "base_link",
         ]
 
         # Add bad orientation termination
@@ -254,6 +262,7 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
             time_out=False,
         )
 
+        self.terminations.bad_orientation = None
 
 @configclass
 class D9RoughEnvEasyCfg_PLAY(D9RoughEnvEasyCfg):
