@@ -26,12 +26,12 @@ repos:
       - id: check-shebang-scripts-are-executable
       - id: detect-private-key
       - id: debug-statements
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        name: isort (python)
-        args: ["--profile", "black", "--filter-files"]
+#   - repo: https://github.com/pycqa/isort
+#     rev: 5.13.2
+#     hooks:
+#       - id: isort
+#         name: isort (python)
+#         args: ["--profile", "black", "--filter-files"]
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.15.1
     hooks:

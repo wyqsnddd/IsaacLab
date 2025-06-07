@@ -102,7 +102,7 @@ class D9Rewards:
 
     no_fly = RewTerm(
         func=utils_no_fly,
-        weight=0.25,
+        weight=0.75,
         params={
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Link_Ankle_Roll"),
         },
@@ -256,7 +256,7 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.track_lin_vel_xy_exp.weight = 2.4
         self.rewards.track_ang_vel_z_exp.weight = 1.6
         self.rewards.feet_air_time.weight = 3.0
-        self.rewards.no_fly.weight = 0.25
+        self.rewards.no_fly.weight = 0.75
         self.rewards.flat_orientation_l2.weight = -1.0
         self.rewards.base_height.weight = -5.0
         self.rewards.phase_contact_reward.weight = 1.0
@@ -264,9 +264,12 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.contact_no_velocity_penalty.weight = -0.0
         self.rewards.air_time_variance_penalty.weight = -0.0
         self.rewards.feet_swing_height.weight = -0.0
-        self.rewards.ang_vel_xy_l2.weight = -0.0
-        self.rewards.joint_deviation_hip.weight = -0.1
-        self.rewards.action_rate_l2.weight = -0.0
+        self.rewards.ang_vel_xy_l2.weight = -1.0
+
+        self.rewards.joint_deviation_hip.weight = -0.5
+        self.rewards.dof_torques_l2.weight = -1.0e-5
+        self.rewards.dof_acc_l2.weight = -2.5e-7
+        self.rewards.action_rate_l2.weight = -0.01
 
         self.rewards.kicking_penalty.weight = -0.5
 
