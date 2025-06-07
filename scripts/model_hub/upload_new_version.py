@@ -13,19 +13,19 @@ def main():
     manager = ModelManager()
 
     # 方法1：创建新的仓库（推荐）
-    base_name = "Yuquan-Wang/pudu-d9-rough-sota"
-    version = "2025-06-05"  # 或者使用其他版本号
+    base_name = "Yuquan-Wang/pudu-d9-rough-walking"
+    version = "2025-06-05-episode-650"  # 或者使用其他版本号
     repo_id = manager.create_versioned_repo(base_name, version)
 
     # 设置训练输出目录
-    output_dir = "../../../data/5-30-rough-std-4/2025-05-30_15-55-48/"
+    output_dir = "../data/6-5-set-4-rough-rewards/2025-06-05_07-20-04"
 
     # 定义关键检查点
-    key_checkpoints = [2000, 5000, 8000, 9000, 12000, 14000, 14999]
+    key_checkpoints = [2000, 5000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 14999]
 
     print(f"Uploading new version to repository: {repo_id}")
     manager.upload_isaaclab_output(
-        output_dir=output_dir, repo_id=repo_id, key_checkpoints=key_checkpoints, create_repo=False  # 已经创建了仓库
+        output_dir=output_dir, repo_id=repo_id, key_checkpoints=key_checkpoints, create_repo=False, notes="This version limits the lateral velocity to +- 0.1 m/s."  
     )
 
     # 方法2：使用分支（替代方案）
