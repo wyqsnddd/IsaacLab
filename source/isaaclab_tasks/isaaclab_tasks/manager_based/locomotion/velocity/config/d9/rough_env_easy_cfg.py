@@ -17,10 +17,13 @@ from isaaclab.utils import configclass
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as mdp
 from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards import (  # noqa F401
     air_time_variance_penalty,
+    alternating_air_time_reward,
     biped_gait_reward,
     contact_no_velocity_penalty,
+    energy_efficiency_reward,
     phase_based_contact_reward,
     utils_no_fly,
+    kicking_penalty,
 )
 from isaaclab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import (  # noqa F401
     LocomotionVelocityRoughEnvCfg,
@@ -45,6 +48,47 @@ class D9Rewards:
     )
 
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.0)
+
+    # Penalize kicking stairs
+    kicking_penalty = RewTerm(
+        func=kicking_penalty,
+        weight=0.0,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "friction_coefficient": 0.5,
+            "std": 0.3,
+        },
+    )
+
+    # Rewards for running
+    feet_air_time_biped = RewTerm(
+        func=mdp.feet_air_time_positive_biped,
+        weight=0.0,
+        params={
+            "command_name": "base_velocity",
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "threshold": 0.1,
+        },
+    )
+
+    alternating_air_time = RewTerm(
+        func=alternating_air_time_reward,
+        weight=0.0,  # 较高的权重以强调交替步态
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Ankle_Roll"),
+            "period": 0.6,  # 0.6秒的步态周期
+            "std": 0.3,  # 较小的标准差使奖励更敏感
+            "force_threshold": 10.0,  # 接触力阈值
+        },
+    )
+    # 能量效率奖励
+    energy_efficiency = RewTerm(
+        func=energy_efficiency_reward,
+        weight=0.1,
+        params={
+            "asset_cfg": SceneEntityCfg("robot"),
+        },
+    )
 
     feet_air_time = RewTerm(
         func=mdp.feet_air_time,
@@ -208,7 +252,7 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
         self.events.base_external_force_torque.params["asset_cfg"].body_names = ["Waist_Yaw"]
 
         # Echo the default weights
-        self.rewards.alive = 2.0
+        self.rewards.alive.weight = 2.0
         self.rewards.track_lin_vel_xy_exp.weight = 2.4
         self.rewards.track_ang_vel_z_exp.weight = 1.6
         self.rewards.feet_air_time.weight = 3.0
@@ -220,9 +264,11 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.contact_no_velocity_penalty.weight = -0.0
         self.rewards.air_time_variance_penalty.weight = -0.0
         self.rewards.feet_swing_height.weight = -0.0
-        self.reward.ang_vel_xy_l2.weight = -0.0
-        self.rewards.joint_deviation_hip = -0.1
+        self.rewards.ang_vel_xy_l2.weight = -0.0
+        self.rewards.joint_deviation_hip.weight = -0.1
         self.rewards.action_rate_l2.weight = -0.0
+
+        self.rewards.kicking_penalty.weight = -0.5
 
         # self.events.reset_base.params = {
         #     "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},

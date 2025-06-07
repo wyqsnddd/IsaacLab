@@ -7,6 +7,7 @@ from isaaclab.envs import mdp as mdp
 from isaaclab.managers import CurriculumTermCfg as CurrTerm
 from isaaclab.utils import configclass
 
+import math
 from .rough_env_easy_cfg import D9RoughEnvEasyCfg
 
 
@@ -38,22 +39,40 @@ class D9RunningEnvCfg(D9RoughEnvEasyCfg):
         self.curriculum.terrain_levels = None
 
         # Echo the default weights
-        self.rewards.track_lin_vel_xy_exp.weight = 1.0
+        self.rewards.alive.weight = 0.8
+        self.rewards.track_lin_vel_xy_exp.weight = 4
+        self.rewards.track_lin_vel_xy_exp.params["std"] = 0.4
         self.rewards.track_ang_vel_z_exp.weight = 0.5
-        self.rewards.feet_air_time.weight = 3.0
-        self.rewards.no_fly.weight = 0.25
+        self.rewards.track_ang_vel_z_exp.params["std"] = 0.4
+        self.rewards.feet_air_time.weight = 3
+        self.rewards.no_fly.weight = 0.0
         self.rewards.phase_contact_reward.weight = 0.0
         self.rewards.flat_orientation_l2.weight = -1.0
         self.rewards.base_height.weight = -5.0
-        # self.rewards.feet_slide.weight = -0.25
+
+
+        # Echo the running rewards
+
+        self.rewards.feet_air_time_biped.weight = 0
+        self.rewards.energy_efficiency.weight = 0.0
+
+        self.rewards.alternating_air_time.weight = 0.6
+        self.rewards.alternating_air_time.params["std"] = 0.4
+
+        self.rewards.feet_slide.weight = -0.2
+        self.rewards.joint_deviation_hip.weight = -0.2
+        self.rewards.ang_vel_xy_l2.weight = -1.0
+
         # self.rewards.contact_no_velocity_penalty.weight = -0.005
         # self.rewards.air_time_variance_penalty.weight = -0.5
         # self.rewards.feet_swing_height.weight = -0.1
 
         # Running commands
         self.commands.base_velocity.ranges.lin_vel_x = (0.0, 5.0)
-        # self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)
-        # self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_y = (-0.3, 0.3)
+        self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
+
+        self.actions.joint_pos.scale = 0.25
 
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
