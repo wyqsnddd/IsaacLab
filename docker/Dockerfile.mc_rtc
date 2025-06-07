@@ -44,7 +44,7 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0
 RUN cmake --version
 
 # Install additional Python packages
-RUN pip3 install --no-cache-dir numpy pandas yq
+RUN pip3 install --no-cache-dir numpy pandas yq jupyterlab
 
 # Install mc_rtc packages
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/mc-rtc/stable/setup.deb.sh' | bash && \
@@ -102,6 +102,9 @@ RUN mkdir -p /root/.ft \
     && wget https://mirrors.tencent.com/repository/generic/ft/files/bin/cli_linux_386 -O /root/.ft/cli_linux_386 \
     && chmod +x /root/.ft/cli_linux_386
 
+# 安装 openssh-server
+RUN apt-get update && apt-get install -y openssh-server && apt-get clean && mkdir -p /var/run/sshd
+
 # 永久添加CLI目录到PATH
 ENV PATH="/root/.ft:$PATH"
 ENV FT_DEBUG=1
@@ -109,6 +112,7 @@ ENV FT_DEBUG=1
 RUN /root/.ft/cli_linux_386 install
 
 ENV HOME_DIR=/workspace/isaaclab
+
 
 # Define the entrypoint or command
 CMD ["bash"]
