@@ -45,30 +45,29 @@ for ((i=0; i<param_count; i++)); do
 
     # 检查当前参数值
     echo "修改前的配置:"
-    grep "self.algorithm.${param_name}" "$CONFIG_FILE"
+    grep "${param_name}" "$CONFIG_FILE"
 
     # 使用更精确的sed模式匹配，处理变量或数值的情况
-    sed -i "s/\([ ]*self.algorithm.${param_name} = \)[a-zA-Z0-9._-]*/\1${param_value}/" "$CONFIG_FILE"
+    sed -i "s/\([ ]*${param_name}[ ]*=[ ]*\)[a-zA-Z0-9._-]*/\1${param_value}/" "$CONFIG_FILE"
 
     # 验证修改
     echo "修改后的配置:"
-    grep "self.algorithm.${param_name}" "$CONFIG_FILE"
+    grep "${param_name}" "$CONFIG_FILE"
     echo "----------------------------------------"
 done
 
 echo "所有PPO参数已修改完成"
 
-cat $CONFIG_FILE
+# cat $CONFIG_FILE
 
 # 启动训练任务
 echo "[$(date +'%F %T')] 启动训练任务..."
-echo "执行命令: ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py --task Isaac-Velocity-Flat-D9-v0 --headless --num_envs 4096 --video --video_length 200 --video_interval 1000 --device cuda:$gpu_id"
+echo "执行命令: ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py --task Isaac-Velocity-Rough-D9-v1 --headless --num_envs 8192 --device cuda:$gpu_id"
 
 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py \
-    --task Isaac-Velocity-Flat-D9-v0 \
+    --task Isaac-Velocity-Rough-D9-v1 \
     --headless \
-    --num_envs 4096 \
-    --video --video_length 200 --video_interval 1000 \
+    --num_envs 8192 \
     --device "cuda:$gpu_id" \
     > "$log_file" 2>&1 &
 
