@@ -40,7 +40,7 @@ class D9RunningEnvCfg(D9RoughEnvEasyCfg):
 
         # Echo the default weights
         self.rewards.alive.weight = 0.8
-        self.rewards.track_lin_vel_xy_exp.weight = 4
+        self.rewards.track_lin_vel_xy_exp.weight = 4.5
         self.rewards.track_lin_vel_xy_exp.params["std"] = 0.4
         self.rewards.track_ang_vel_z_exp.weight = 0.5
         self.rewards.track_ang_vel_z_exp.params["std"] = 0.4
@@ -56,7 +56,7 @@ class D9RunningEnvCfg(D9RoughEnvEasyCfg):
         self.rewards.feet_air_time_biped.weight = 0
         self.rewards.energy_efficiency.weight = 0.0
 
-        self.rewards.alternating_air_time.weight = 0.6
+        self.rewards.alternating_air_time.weight = 1.6
         self.rewards.alternating_air_time.params["std"] = 0.4
 
         self.rewards.feet_slide.weight = -0.2
