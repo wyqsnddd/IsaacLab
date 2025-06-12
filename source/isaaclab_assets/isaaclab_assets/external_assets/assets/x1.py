@@ -14,7 +14,7 @@ from isaaclab.assets import ArticulationCfg
 
 X1_12DOF_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=loader.get_robot_usd_path("x1", "x1_12dof.usd"),
+        usd_path=loader.get_robot_usd_path("x1", "x1.usd"),
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -32,15 +32,15 @@ X1_12DOF_CFG = ArticulationCfg(
     init_state=ArticulationCfg.InitialStateCfg(
         pos=(0.0, 0.0, 0.80),
         joint_pos={
-            "leg-j1_r": 0.3,
-            "leg-j1_l": -0.3,
-            "leg-j2_.*": 0.0,
-            "leg-j3_.*": 0.0,
-            "leg-j4_r": 0.7,
-            "leg-j4_l": -0.7,
-            "leg-j5_r": -0.4,
-            "leg-j5_l": 0.4,
-            "leg-j6_.*": 0.0,
+            "leg_j1_r": -0.3,
+            "leg_j1_l": -0.3,
+            "leg_j2_.*": 0.0,
+            "leg_j3_.*": 0.0,
+            "leg_j4_r": 0.7,
+            "leg_j4_l": 0.7,
+            "leg_j5_r": -0.4,
+            "leg_j5_l": -0.4,
+            "leg_j6_.*": 0.0,
         },
         joint_vel={".*": 0.0},
     ),
@@ -48,31 +48,31 @@ X1_12DOF_CFG = ArticulationCfg(
     actuators={
         "legs": ImplicitActuatorCfg(
             joint_names_expr=[
-                "leg-j.*",
+                "leg_j.*",
             ],
             stiffness={
-                "leg-j1_.*": 200.0,
-                "leg-j3.*": 150.0,
-                "leg-j2.*": 150.0,
-                "leg-j4.*": 200.0,
+                "leg_j1.*": 200.0,
+                "leg_j3.*": 150.0,
+                "leg_j2.*": 150.0,
+                "leg_j4.*": 200.0,
             },
             damping={
-                "leg-j1_.*": 5,
-                "leg-j3_.*": 5,
-                "leg-j2_.*": 5,
-                "leg-j4_.*": 5.0,
+                "leg_j1.*": 5,
+                "leg_j3.*": 5,
+                "leg_j2.*": 5,
+                "leg_j4.*": 5.0,
             },
             armature=0.01,
         ),
         "feet": ImplicitActuatorCfg(
-            joint_names_expr=["leg-j5.*", "leg-j6.*"],
+            joint_names_expr=["leg_j5.*", "leg_j6.*"],
             stiffness={
-                "leg-j5.*": 20.0,
-                "leg-j6.*": 20.0,
+                "leg_j5.*": 20.0,
+                "leg_j6.*": 20.0,
             },
             damping={
-                "leg-j5.*": 2.0,
-                "leg-j6.*": 2.0,
+                "leg_j5.*": 2.0,
+                "leg_j6.*": 2.0,
             },
             armature=0.01,
         ),
