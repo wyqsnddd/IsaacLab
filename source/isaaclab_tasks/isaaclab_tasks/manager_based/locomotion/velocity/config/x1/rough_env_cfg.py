@@ -315,7 +315,7 @@ class X1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
 
 
 @configclass
-class X1RoughEnvEasyCfg_PLAY(X1RoughEnvEasyCfg):
+class X1RoughEnvCfg_PLAY(X1RoughEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()

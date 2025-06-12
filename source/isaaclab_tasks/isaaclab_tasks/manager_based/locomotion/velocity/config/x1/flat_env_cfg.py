@@ -7,7 +7,7 @@ from isaaclab.envs import mdp as mdp
 from isaaclab.managers import CurriculumTermCfg as CurrTerm
 from isaaclab.utils import configclass
 
-from .rough_env_easy_cfg import X1RoughEnvCfg
+from .rough_env_cfg import X1RoughEnvCfg
 
 
 @configclass
@@ -20,7 +20,7 @@ class CurriculumCfg:
 
 
 @configclass
-class X1FlatEnvEasyCfg(X1RoughEnvEasyCfg):
+class X1FlatEnvCfg(X1RoughEnvCfg):
 
     curriculum: CurriculumCfg = CurriculumCfg()
 
@@ -51,7 +51,7 @@ class X1FlatEnvEasyCfg(X1RoughEnvEasyCfg):
         # self.rewards.feet_swing_height.weight = -0.1
 
 
-class X1FlatEnvEasyCfg_PLAY(X1FlatEnvEasyCfg):
+class X1FlatEnvCfg_PLAY(X1FlatEnvCfg):
     def __post_init__(self) -> None:
         # post init of parent
         super().__post_init__()
