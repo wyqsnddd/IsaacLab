@@ -285,15 +285,15 @@ class X1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         ]
 
         # Add bad orientation termination
-        # self.terminations.bad_orientation = TerminationTermCfg(
-        #     func=mdp.bad_orientation,
-        #     params={
-        #         # "limit_angle": 0.436,  # Limit angle in radians (approximately 25 degrees)
-        #         "limit_angle": 1.0,  # Limit angle in radians (approximately 57 degrees)
-        #         "asset_cfg": SceneEntityCfg("robot", body_names=["Base_Link"]),
-        #     },
-        #     time_out=False,
-        # )
+        self.terminations.bad_orientation = TerminationTermCfg(
+            func=mdp.bad_orientation,
+            params={
+                # "limit_angle": 0.436,  # Limit angle in radians (approximately 25 degrees)
+                "limit_angle": 1.0,  # Limit angle in radians (approximately 57 degrees)
+                "asset_cfg": SceneEntityCfg("robot", body_names=["Base_Link"]),
+            },
+            time_out=False,
+        )
 
         # self.terminations.bad_orientation = None
 
