@@ -52,7 +52,7 @@ class X1Rewards:
         func=kicking_penalty,
         weight=0.0,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="leg_j6.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="Ankle_Roll_.*"),
             "friction_coefficient": 0.5,
             "std": 0.3,
         },
@@ -64,7 +64,7 @@ class X1Rewards:
         weight=0.0,
         params={
             "command_name": "base_velocity",
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="leg_j6.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="Ankle_Roll_.*"),
             "threshold": 0.1,
         },
     )
@@ -73,7 +73,7 @@ class X1Rewards:
         func=alternating_air_time_reward,
         weight=0.0,  # 较高的权重以强调交替步态
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="leg_j6.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="Ankle_Roll_.*"),
             "period": 0.6,  # 0.6秒的步态周期
             "std": 0.3,  # 较小的标准差使奖励更敏感
             "force_threshold": 10.0,  # 接触力阈值
@@ -93,7 +93,7 @@ class X1Rewards:
         weight=3.0,
         params={
             "command_name": "base_velocity",
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="leg_j6.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="Ankle_Roll_.*"),
             "threshold": 0.6,
         },
     )
@@ -102,7 +102,7 @@ class X1Rewards:
         func=utils_no_fly,
         weight=0.75,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="leg_j6.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="Ankle_Roll_.*"),
         },
     )
 
@@ -111,7 +111,7 @@ class X1Rewards:
         func=phase_based_contact_reward,
         weight=0.0,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="leg_j6.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="Ankle_Roll_.*"),
             "period": 0.8,
             "offset": 0.5,
             "std": 0.5,
@@ -123,8 +123,8 @@ class X1Rewards:
         func=contact_no_velocity_penalty,
         weight=0.0,  # Negative weight since this is a penalty
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="leg_j6.*"),
-            "asset_cfg": SceneEntityCfg("robot", body_names="leg_j6.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="Ankle_Roll_.*"),
+            "asset_cfg": SceneEntityCfg("robot", body_names="Ankle_Roll_.*"),
             "force_threshold": 1.0,
         },
     )
@@ -133,8 +133,8 @@ class X1Rewards:
         func=mdp.feet_swing_height,
         weight=0.0,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="leg_j6.*"),
-            "asset_cfg": SceneEntityCfg("robot", body_names="leg_j6.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="Ankle_Roll_.*"),
+            "asset_cfg": SceneEntityCfg("robot", body_names="Ankle_Roll_.*"),
             "target_height": 0.12,
         },
     )
@@ -143,8 +143,8 @@ class X1Rewards:
         func=mdp.feet_slide,
         weight=-0.0,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="leg_j6.*"),
-            "asset_cfg": SceneEntityCfg("robot", body_names="leg_j6.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="Ankle_Roll_.*"),
+            "asset_cfg": SceneEntityCfg("robot", body_names="Ankle_Roll_.*"),
         },
     )
     # Add air time variance penalty
@@ -152,7 +152,7 @@ class X1Rewards:
         func=air_time_variance_penalty,
         weight=-0.0,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="leg_j6.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="Ankle_Roll_.*"),
             "std": 0.1,
         },
     )
@@ -162,8 +162,8 @@ class X1Rewards:
         func=biped_gait_reward,
         weight=0.0,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="leg_j6.*"),
-            "asset_cfg": SceneEntityCfg("robot", body_names="leg_j6.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="Ankle_Roll_.*"),
+            "asset_cfg": SceneEntityCfg("robot", body_names="Ankle_Roll_.*"),
             "std": 0.1,
             "max_err": 0.2,
             "velocity_threshold": 0.1,
@@ -176,7 +176,7 @@ class X1Rewards:
         func=mdp.base_height_l2,
         weight=-5.0,
         params={
-            "target_height": 0.80,
+            "target_height": 1.08,
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         },
     )
@@ -184,32 +184,32 @@ class X1Rewards:
     dof_torques_l2 = RewTerm(
         func=mdp.joint_torques_l2,
         weight=-1.0e-5,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["leg_j.*"])},
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["Joint_Hip_.*", "Joint_Knee_.*", "Joint_Ankle_.*"])},
     )
 
     dof_vel_l2 = RewTerm(
         func=mdp.joint_vel_l2,
         weight=-0.005,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["leg_j.*"])},
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["Joint_Hip_.*", "Joint_Knee_.*", "Joint_Ankle_.*"])},
     )
 
     dof_acc_l2 = RewTerm(
         func=mdp.joint_acc_l2,
         weight=-2.5e-7,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["leg_j.*"])},
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["Joint_Hip_.*", "Joint_Knee_.*", "Joint_Ankle_.*"])},
     )
 
     # Penalize ankle joint limits
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
         weight=-1.0,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["leg_j.*"])},
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["Joint_Hip_.*", "Joint_Knee_.*", "Joint_Ankle_.*"])},
     )
 
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l2,
         weight=-0.1,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["leg_j2.*", "leg_j3.*"])},
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["Joint_Hip_Roll_.*", "Joint_Hip_Yaw_.*"])},
     )
 
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.0)
