@@ -1,0 +1,22 @@
+# 网络配置
+network:
+  input_dim: 235
+  output_dim: 12
+  hidden_dims: [512, 256, 128]
+  activation: "elu"
+
+# 动作配置
+action:
+  scale: 0.25
+  default_angles: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+# TensorRT 配置
+tensorrt:
+  workspace_size: 1073741824  # 1GB
+  fp16: true
+  max_batch_size: 1
+
+# 文件路径
+paths:
+  onnx_model: "path/to/your/model.onnx"
+  engine_file: "path/to/your/model.engine"
