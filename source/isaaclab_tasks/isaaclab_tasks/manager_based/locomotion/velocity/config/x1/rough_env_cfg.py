@@ -177,7 +177,7 @@ class X1Rewards:
         weight=-5.0,
         params={
             "target_height": 1.08,
-            "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
+            "asset_cfg": SceneEntityCfg("robot", body_names="Base_Link"),
         },
     )
 
@@ -224,15 +224,15 @@ class X1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         super().__post_init__()
         # Scene
         self.scene.robot = X1_12DOF_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
-        self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
+        self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/Base_Link"
         # self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/torso_link"
 
         # Randomization
         # self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 3.0)
-        self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
+        self.events.add_base_mass.params["asset_cfg"].body_names = ["Base_Link"]
 
         # self.events.reset_robot_joints.params["position_range"] = (0.9, 1.1)
-        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
+        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["Base_Link"]
 
         # Echo the default weights
         self.rewards.alive.weight = 2.0
@@ -277,11 +277,11 @@ class X1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # terminations
         self.actions.joint_pos.scale = 0.25
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
-            "base_link",
-            "leg_j1.*",
-            "leg_j2.*",
-            "leg_j3.*",
-            "leg_j4.*",
+            "Base_Link",
+            "Hip_Pitch_.*",
+            "Hip_Roll_.*",
+            "Hip_Yaw_.*",
+            "Knee_Pitch_.*",
         ]
 
         # Add bad orientation termination
@@ -290,7 +290,7 @@ class X1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
             params={
                 # "limit_angle": 0.436,  # Limit angle in radians (approximately 25 degrees)
                 "limit_angle": 1.0,  # Limit angle in radians (approximately 57 degrees)
-                "asset_cfg": SceneEntityCfg("robot", body_names=["base_link"]),
+                "asset_cfg": SceneEntityCfg("robot", body_names=["Base_Link"]),
             },
             time_out=False,
         )
