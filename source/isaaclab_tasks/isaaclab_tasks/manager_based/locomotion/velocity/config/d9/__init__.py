@@ -29,7 +29,7 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": f"{__name__}.running_env_cfg:D9RunningEnvCfg",
-        "rsl_rl_cfg_entry_point": f"{agents.__name__}.d9_rsl_rl_ppo_cfg:D9FlatPPORunnerEasyCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.d9_rsl_rl_ppo_cfg:D9FlatRunningPPORunnerEasyCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_flat_ppo_cfg.yaml",
     },
 )
@@ -41,7 +41,7 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": f"{__name__}.running_env_cfg:D9RunningEnvCfg_PLAY",
-        "rsl_rl_cfg_entry_point": f"{agents.__name__}.d9_rsl_rl_ppo_cfg:D9FlatPPORunnerEasyCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.d9_rsl_rl_ppo_cfg:D9FlatRunningPPORunnerEasyCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_flat_ppo_cfg.yaml",
     },
 )

@@ -181,6 +181,29 @@ class D9RoughPPORunnerEasyCfg(RslRlOnPolicyRunnerCfg):
 
 
 @configclass
+class D9FlatRunningPPORunnerEasyCfg(D9RoughPPORunnerEasyCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        self.algorithm = RslRlPpoAlgorithmCfg(
+            value_loss_coef=4.0,
+            use_clipped_value_loss=True,
+            clip_param=0.2,
+            entropy_coef=0.005,
+            num_learning_epochs=5,
+            num_mini_batches=4,
+            learning_rate=1.0e-4,
+            schedule="adaptive",
+            gamma=0.99,
+            lam=0.95,
+            desired_kl=0.01,
+            max_grad_norm=1.0,
+        )
+
+        self.max_iterations = 20000
+        self.experiment_name = "d9_running"
+
+
+@configclass
 class D9FlatPPORunnerEasyCfg(D9RoughPPORunnerEasyCfg):
     def __post_init__(self):
         super().__post_init__()
