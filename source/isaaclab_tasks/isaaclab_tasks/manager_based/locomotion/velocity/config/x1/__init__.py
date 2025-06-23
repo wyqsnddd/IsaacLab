@@ -52,3 +52,24 @@ gym.register(
         "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:X1FlatPPORunner15DofCfg",
     },
 )
+
+gym.register(
+    id="Isaac-Velocity-Flat-X1-17Dof-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.flat_env_cfg_17dof:X1FlatEnv17DofCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:X1FlatPPORunner17DofCfg",
+    },
+)
+
+
+gym.register(
+    id="Isaac-Velocity-Flat-X1-17Dof-Play-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.flat_env_cfg_17dof:X1FlatEnv17DofCfg_PLAY",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:X1FlatPPORunner17DofCfg",
+    },
+)

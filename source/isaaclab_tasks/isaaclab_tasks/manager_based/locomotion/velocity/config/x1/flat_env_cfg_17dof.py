@@ -1,10 +1,10 @@
 from isaaclab.utils import configclass
 
-from .rough_env_cfg_15dof import X1RoughEnv15DofCfg, X1RecordCfg
+from .rough_env_cfg_17dof import X1RoughEnv17DofCfg, X1RecordCfg
 
 
 @configclass
-class X1FlatEnv15DofCfg(X1RoughEnv15DofCfg):
+class X1FlatEnv17DofCfg(X1RoughEnv17DofCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
@@ -19,7 +19,7 @@ class X1FlatEnv15DofCfg(X1RoughEnv15DofCfg):
         self.curriculum.terrain_levels = None
 
 
-class X1FlatEnv15DofCfg_PLAY(X1FlatEnv15DofCfg):
+class X1FlatEnv17DofCfg_PLAY(X1FlatEnv17DofCfg):
     recorders: object = X1RecordCfg()
     def __post_init__(self) -> None:
         # post init of parent
@@ -35,7 +35,7 @@ class X1FlatEnv15DofCfg_PLAY(X1FlatEnv15DofCfg):
         self.events.base_external_force_torque = None
         self.events.push_robot = None
 
-        self.commands.base_velocity.ranges.lin_vel_x = (0.8, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0., 0.)
         self.commands.base_velocity.ranges.ang_vel_z = (-0, 0)
         self.commands.base_velocity.ranges.heading = (-0., 0.)
