@@ -5,11 +5,11 @@
 
 from isaaclab.utils import configclass
 
-from .rough_env_cfg import X1RoughEnvCfg
+from .rough_env_cfg_12dof import X1RoughEnv12DofCfg
 
 
 @configclass
-class X1FlatEnvCfg(X1RoughEnvCfg):
+class X1FlatEnv12DofCfg(X1RoughEnv12DofCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
@@ -24,7 +24,7 @@ class X1FlatEnvCfg(X1RoughEnvCfg):
         self.curriculum.terrain_levels = None
 
 
-class X1FlatEnvCfg_PLAY(X1FlatEnvCfg):
+class X1FlatEnv12DofCfg_PLAY(X1FlatEnv12DofCfg):
     def __post_init__(self) -> None:
         # post init of parent
         super().__post_init__()

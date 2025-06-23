@@ -13,7 +13,7 @@ from isaaclab_tasks.manager_based.locomotion.velocity.config.x1.mdp.record impor
 from isaaclab.managers.recorder_manager import RecorderManagerBaseCfg
 
 @configclass
-class X1RewardsCfg:
+class X1Rewards12DOFCfg:
     """Reward terms for the MDP."""
     # main reward
     track_lin_vel_xy_exp = RewTerm(
@@ -98,8 +98,8 @@ class X1RecordCfg(RecorderManagerBaseCfg):
     record_pre_step_actions = PreStepActionsRecorderCfg()
 
 @configclass
-class X1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
-    rewards: X1RewardsCfg = X1RewardsCfg()
+class X1RoughEnv12DofCfg(LocomotionVelocityRoughEnvCfg):
+    rewards: X1Rewards12DOFCfg = X1Rewards12DOFCfg()
     recorders: object = X1RecordCfg()
 
     def __post_init__(self):
@@ -121,7 +121,7 @@ class X1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.terminations.base_contact.params["sensor_cfg"].body_names = ["Base_Link"]
         
 @configclass
-class X1RoughEnvCfg_PLAY(X1RoughEnvCfg):
+class X1RoughEnv12DofCfg_PLAY(X1RoughEnv12DofCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()

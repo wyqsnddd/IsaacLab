@@ -8,7 +8,9 @@ import isaaclab_tasks.manager_based.locomotion.velocity.mdp as mdp
 from isaaclab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityRoughEnvCfg
 from isaaclab_tasks.manager_based.locomotion.velocity.config.x1.mdp.rewards import utils_no_fly, joint_deviation_l2, leg_arm_symmetric
 import math
-
+from isaaclab.utils.datasets import HDF5DatasetFileHandler
+from isaaclab_tasks.manager_based.locomotion.velocity.config.x1.mdp.record import PreStepActionsRecorderCfg, PostStepTorqueRecorderCfg, PreStepStatesRecorderCfg
+from isaaclab.managers.recorder_manager import RecorderManagerBaseCfg
 
 @configclass
 class X1Rewards15DOFCfg:
@@ -56,8 +58,8 @@ class X1Rewards15DOFCfg:
 
     # dof contraints
     dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*"])})
-    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-0.005, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*"])})
-    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*"])})
+    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-0.005, params={"asset_cfg": SceneEntityCfg("robot", joint_names=["Joint_Waist_Yaw", "Joint_Hip.*", "Joint_Knee.*", "Joint_Ankle.*"])})
+    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7, params={"asset_cfg": SceneEntityCfg("robot", joint_names=["Joint_Waist_Yaw", "Joint_Hip.*", "Joint_Knee.*", "Joint_Ankle.*"])})
 
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
@@ -75,29 +77,58 @@ class X1Rewards15DOFCfg:
         },
     )
 
-    joint_deviation_extra = RewTerm(
+    joint_deviation_waist = RewTerm(
         func = joint_deviation_l2,
         weight=-2.0,
         params={
             "asset_cfg": SceneEntityCfg(
-                "robot", joint_names=["Joint_Shoulder_Pitch_.*"]
+                "robot", joint_names=["Joint_Waist_Yaw"]
+            )
+        },
+    )
+
+    joint_deviation_shoulder = RewTerm(
+        func = joint_deviation_l2,
+        weight=-0.1,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_names=["Joint_Shoulder.*"]
             )
         },
     )
 
     leg_arm_symmetric_reward = RewTerm(
         func = leg_arm_symmetric,
-        weight= -0.1,
+        weight= 0.2,
         params={
             "asset_cfg_leg": SceneEntityCfg(
                 "robot", joint_names=["Joint_Hip_Pitch_Left", "Joint_Hip_Pitch_Right"]
             ),
             "asset_cfg_arm": SceneEntityCfg(
-                "robot", joint_names=["Joint_Shoulder_Pitch_Left", "Joint_Hip_Pitch_Right"]
+                "robot", joint_names=["Joint_Shoulder_Pitch_Left", "Joint_Shoulder_Pitch_Right"]
             )
         },
     )
 
+@configclass
+class X1RecordCfg(RecorderManagerBaseCfg):
+    dataset_file_handler_class_type: type = HDF5DatasetFileHandler
+
+    dataset_export_dir_path: str = "tmp/isaaclab/logs"
+    """The directory path where the recorded datasets are exported."""
+
+    dataset_filename: str = "x1_15dof"
+    """Dataset file name without file extension."""
+
+    dataset_export_mode: 1 # Export all episodes to a single dataset file
+    """The mode to handle episode exports."""
+
+    export_in_record_pre_reset: bool = True
+    """Whether to export episodes in the record_pre_reset call."""
+
+    record_post_step_torques = PostStepTorqueRecorderCfg()
+    record_pre_step_states = PreStepStatesRecorderCfg()
+    record_pre_step_actions = PreStepActionsRecorderCfg()
 
 @configclass
 class X1RoughEnv15DofCfg(LocomotionVelocityRoughEnvCfg):
@@ -121,7 +152,8 @@ class X1RoughEnv15DofCfg(LocomotionVelocityRoughEnvCfg):
         self.terminations.base_contact.params["sensor_cfg"].body_names = ["Base_Link"]
         
 @configclass
-class X1RoughEnv15Dof_PLAY(X1RoughEnv15DofCfg):
+class X1RoughEnv15DofCfg_PLAY(X1RoughEnv15DofCfg):
+    recorders: object = X1RecordCfg()
     def __post_init__(self):
         # post init of parent
         super().__post_init__()

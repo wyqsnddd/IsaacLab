@@ -8,11 +8,11 @@ from isaaclab.utils import configclass
 from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, RslRlPpoAlgorithmCfg
 
 @configclass
-class X1RoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
+class X1RoughPPORunner12DofCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 2000
     save_interval = 200
-    experiment_name = "X1_rough"
+    experiment_name = "X1_12dof_rough"
     empirical_normalization = False
     policy = RslRlPpoActorCriticCfg(
         init_noise_std=0.8,
@@ -37,15 +37,15 @@ class X1RoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
 
 
 @configclass
-class X1FlatPPORunnerCfg(X1RoughPPORunnerCfg):
+class X1FlatPPORunner12DofCfg(X1RoughPPORunner12DofCfg):
     def __post_init__(self):
         super().__post_init__()
 
         self.max_iterations = 2000
-        self.experiment_name = "X1_flat"
+        self.experiment_name = "X1_12dof_flat"
 
 @configclass
-class X1RoughPPORunner15DofCfg(X1RoughPPORunnerCfg):
+class X1RoughPPORunner15DofCfg(X1RoughPPORunner12DofCfg):
     num_steps_per_env = 24
     max_iterations = 2000
     save_interval = 200
@@ -74,7 +74,7 @@ class X1RoughPPORunner15DofCfg(X1RoughPPORunnerCfg):
 
 
 @configclass
-class X1FlatPPORunner15DofCfg(X1RoughPPORunnerCfg):
+class X1FlatPPORunner15DofCfg(X1RoughPPORunner12DofCfg):
     def __post_init__(self):
         super().__post_init__()
 

@@ -14,7 +14,7 @@ from isaaclab.assets import ArticulationCfg
 
 X1_12DOF_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=loader.get_robot_usd_path("x1", "x1.usd"),
+        usd_path=loader.get_robot_usd_path("X1", "X1_12dof.usd"),
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -79,10 +79,9 @@ X1_12DOF_CFG = ArticulationCfg(
     },
 )
 
-
 X1_15DOF_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=loader.get_robot_usd_path("x1", "x1_15dof.usd"),
+        usd_path=loader.get_robot_usd_path("X1", "X1_15dof.usd"),
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -150,7 +149,7 @@ X1_15DOF_CFG = ArticulationCfg(
             joint_names_expr=["Joint_Shoulder_Pitch_.*", "Joint_Waist_Yaw"],
             stiffness={
                 "Joint_Shoulder_Pitch_.*": 20.0,
-                "Joint_Waist_Yaw": 100.0,
+                "Joint_Waist_Yaw": 150.0,
             },
             damping={
                 "Joint_Shoulder_Pitch_.*": 2.0,

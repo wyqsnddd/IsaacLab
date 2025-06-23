@@ -1,6 +1,6 @@
 from isaaclab.utils import configclass
 
-from .rough_env_cfg_15dof import X1RoughEnv15DofCfg
+from .rough_env_cfg_15dof import X1RoughEnv15DofCfg, X1RecordCfg
 
 
 @configclass
@@ -20,6 +20,7 @@ class X1FlatEnv15DofCfg(X1RoughEnv15DofCfg):
 
 
 class X1FlatEnv15DofCfg_PLAY(X1FlatEnv15DofCfg):
+    recorders: object = X1RecordCfg()
     def __post_init__(self) -> None:
         # post init of parent
         super().__post_init__()

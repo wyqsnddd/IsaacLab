@@ -43,8 +43,9 @@ def leg_arm_symmetric(
     asset_leg: Articulation = env.scene[asset_cfg_leg.name]
     asset_arm: Articulation = env.scene[asset_cfg_arm.name]
 
-    leg_vel = asset_leg.data.joint_vel[:, asset_cfg_leg.joint_ids]
-    arm_vel = asset_arm.data.joint_vel[:, asset_cfg_arm.joint_ids]
-    angle = leg_vel - arm_vel
+    leg_pos = asset_leg.data.joint_vel[:, asset_cfg_leg.joint_ids] # - asset_leg.data.default_joint_pos[:, asset_cfg_leg.joint_ids]
+    arm_pos = asset_arm.data.joint_vel[:, asset_cfg_arm.joint_ids] # - asset_arm.data.default_joint_pos[:, asset_cfg_arm.joint_ids]
+    diff = leg_pos + arm_pos 
 
-    return torch.norm(angle, p=2, dim=1)
+    rew = torch.exp(-2 * torch.sum(diff ** 2, dim=1))
+    return rew 
