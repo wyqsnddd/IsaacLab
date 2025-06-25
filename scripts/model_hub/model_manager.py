@@ -215,7 +215,12 @@ model = torch.load('path/to/model.pt')
             shutil.rmtree(temp_dir)
 
     def upload_isaaclab_output(
-        self, output_dir: str, repo_id: str, key_checkpoints: list[int] = None, create_repo: bool = True, notes: str = None
+        self,
+        output_dir: str,
+        repo_id: str,
+        key_checkpoints: list[int] = None,
+        create_repo: bool = True,
+        notes: str = None,
     ) -> None:
         """
         上传 IsaacLab 训练输出到 Hugging Face Hub
@@ -264,12 +269,29 @@ model = torch.load('path/to/model.pt')
                     shutil.copy2(src_path, dst_path)
                     self.api.upload_file(path_or_fileobj=str(dst_path), path_in_repo=f"logs/{file}", repo_id=repo_id)
 
-            # 4. 创建并上传 README
+            # 4. 保存 exported 文件（.pt 和 .onnx）
+            exported_dir = os.path.join(output_dir, "exported")
+            if os.path.exists(exported_dir):
+                for file in os.listdir(exported_dir):
+                    if file.endswith((".pt", ".onnx")):
+                        src_path = os.path.join(exported_dir, file)
+                        dst_path = temp_dir / file
+                        shutil.copy2(src_path, dst_path)
+                        self.api.upload_file(
+                            path_or_fileobj=str(dst_path), path_in_repo=f"exported/{file}", repo_id=repo_id
+                        )
+
+            # 5. 创建并上传 README
             readme_content = f"""# IsaacLab Training Output
 
 ## Model Checkpoints
 - Final model: model_9999.pt
 {'- ' + chr(10) + '- '.join([f'Checkpoint {cp}: model_{cp}.pt' for cp in key_checkpoints]) if key_checkpoints else ''}
+
+## Exported Models
+Optimized models for deployment are available in the `exported/` directory:
+- `policy.pt`: Optimized PyTorch model
+- `policy.onnx`: ONNX format model for cross-platform deployment
 
 ## Training Configuration
 See the `params/` directory for training configuration files.
@@ -281,11 +303,21 @@ Training logs are available in the `logs/` directory.
 Demo videos are available in the `videos/` directory.
 
 ## Usage
-1. Download the model checkpoint
-2. Load using PyTorch:
+### Using PyTorch Checkpoints
 ```python
 import torch
 model = torch.load('path/to/model.pt')
+```
+
+### Using Exported Models
+```python
+# PyTorch
+import torch
+model = torch.load('exported/policy.pt')
+
+# ONNX (requires onnxruntime)
+import onnxruntime as ort
+session = ort.InferenceSession('exported/policy.onnx')
 ```
 
 ## Notes
