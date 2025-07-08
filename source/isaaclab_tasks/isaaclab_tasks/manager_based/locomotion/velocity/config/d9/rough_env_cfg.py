@@ -1,13 +1,3 @@
-# Copyright (c) 2022-2025, The Isaac Lab Project Developers.
-# All rights reserved.
-#
-# SPDX-License-Identifier: BSD-3-Clause
-
-##
-# Pre-defined configs
-##
-# TODO: import PUDU_D9
-# from isaaclab_assets import G1_MINIMAL_CFG  # isort: skip
 from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_12DOF_CFG # noqa F401
 
 from isaaclab.managers import RewardTermCfg as RewTerm

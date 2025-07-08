@@ -33,6 +33,27 @@ gym.register(
 )
 
 gym.register(
+    id="Isaac-Velocity-Rough-X1-12Dof-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.rough_env_cfg_12dof:X1RoughEnv12DofCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:X1RoughPPORunner12DofCfg",
+    },
+)
+
+
+gym.register(
+    id="Isaac-Velocity-Rough-X1-12Dof-Play-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.rough_env_cfg_12dof:X1RoughEnv12DofCfg_PLAY",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:X1RoughPPORunner12DofCfg",
+    },
+)
+
+gym.register(
     id="Isaac-Velocity-Flat-X1-15Dof-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,

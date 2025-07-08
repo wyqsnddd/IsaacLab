@@ -43,6 +43,7 @@ class X1Rewards12DOFCfg:
 
     # base contraints
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-1.0)
+
     base_height = RewTerm(
         func=mdp.base_height_l2,
         weight = -5.0,
@@ -63,7 +64,7 @@ class X1Rewards12DOFCfg:
 
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
-        weight=-1.0,
+        weight=-5.0,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*"])},
     )
     
@@ -100,7 +101,7 @@ class X1RecordCfg(RecorderManagerBaseCfg):
 @configclass
 class X1RoughEnv12DofCfg(LocomotionVelocityRoughEnvCfg):
     rewards: X1Rewards12DOFCfg = X1Rewards12DOFCfg()
-    recorders: object = X1RecordCfg()
+    # recorders: object = X1RecordCfg()
 
     def __post_init__(self):
         # post init of parent
