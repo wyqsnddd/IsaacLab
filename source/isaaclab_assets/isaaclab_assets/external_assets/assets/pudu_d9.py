@@ -74,9 +74,9 @@ PUDU_D9_12DOF_CFG = ArticulationCfg(
     },
 )
 
-PUDU_D9_14DOF_CFG = ArticulationCfg(
+PUDU_D9_15DOF_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=loader.get_robot_usd_path("pudu_d9", "d9_14dof.usd"),
+        usd_path=loader.get_robot_usd_path("pudu_d9", "d9_15dof.usd"),
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -101,6 +101,7 @@ PUDU_D9_14DOF_CFG = ArticulationCfg(
             ".*_Ankle_Joint_Pitch": 0.4,
             ".*_Ankle_Joint_Roll": 0.0,
             ".*_shoulder_pitch": 0.0,
+            "Waist_Joint_Yaw": 0.0,
         },
         joint_vel={".*": 0.0},
     ),
@@ -134,21 +135,23 @@ PUDU_D9_14DOF_CFG = ArticulationCfg(
             armature=0.01,
         ),
         "extras": ImplicitActuatorCfg(
-            joint_names_expr=[".*_shoulder_pitch"],
+            joint_names_expr=[".*_shoulder_pitch", "Waist_Joint_Yaw"],
             stiffness={
                 ".*_shoulder_pitch": 20.0,
+                "Waist_Joint_Yaw": 150,
             },
             damping={
                 ".*_shoulder_pitch": 2.0,
+                "Waist_Joint_Yaw":5,
             },
             armature=0.01,
         ),
     },
 )
 
-PUDU_D9_16DOF_CFG = ArticulationCfg(
+PUDU_D9_17DOF_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=loader.get_robot_usd_path("pudu_d9", "d9_16dof.usd"),
+        usd_path=loader.get_robot_usd_path("pudu_d9", "d9_17dof.usd"),
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -173,7 +176,9 @@ PUDU_D9_16DOF_CFG = ArticulationCfg(
             ".*_Ankle_Joint_Pitch": 0.4,
             ".*_Ankle_Joint_Roll": 0.0,
             ".*_shoulder_pitch": 0.0,
-            ".*_shoulder_roll": 0.0,
+            "right_shoulder_roll": -0.1,
+            "left_shoulder_roll": 0.1,
+            "Waist_Joint_Yaw": 0.0,
         },
         joint_vel={".*": 0.0},
     ),
@@ -207,14 +212,16 @@ PUDU_D9_16DOF_CFG = ArticulationCfg(
             armature=0.01,
         ),
         "extras": ImplicitActuatorCfg(
-            joint_names_expr=[".*_shoulder_pitch", ".*_shoulder_roll"],
+            joint_names_expr=[".*_shoulder_pitch", ".*_shoulder_roll", "Waist_Joint_Yaw"],
             stiffness={
                 ".*_shoulder_pitch": 20.0,
                 ".*_shoulder_roll": 20.0,
+                "Waist_Joint_Yaw": 150,
             },
             damping={
                 ".*_shoulder_pitch": 2.0,
                 ".*_shoulder_roll": 2.0,
+                "Waist_Joint_Yaw": 5.0,
             },
             armature=0.01,
         ),

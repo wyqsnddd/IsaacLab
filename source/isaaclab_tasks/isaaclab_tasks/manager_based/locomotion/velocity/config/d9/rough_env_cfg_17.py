@@ -1,4 +1,4 @@
-from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_16DOF_CFG # noqa F401
+from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_17DOF_CFG # noqa F401
 
 from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
@@ -77,6 +77,16 @@ class D9RewardsCfg:
         },
     )
 
+    joint_deviation_waist = RewTerm(
+        func = joint_deviation_l2,
+        weight=-2.0,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_names=["Waist_Joint_Yaw"]
+            )
+        },
+    )
+
     joint_deviation_shoulder = RewTerm(
         func = joint_deviation_l2,
         weight=-0.1,
@@ -95,18 +105,18 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # post init of parent
         super().__post_init__()
         # Scene
-        self.scene.robot = PUDU_D9_16DOF_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.robot = PUDU_D9_17DOF_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
 
         # Randomization
         # self.events.push_robot = None
         # self.events.add_base_mass = None
-        self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
-        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
+        self.events.add_base_mass.params["asset_cfg"].body_names = ["Waist_Yaw"]
+        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["Waist_Yaw"]
 
         # terminations
         self.actions.joint_pos.scale = 0.25
-        self.terminations.base_contact.params["sensor_cfg"].body_names = ["base_link"]
+        self.terminations.base_contact.params["sensor_cfg"].body_names = ["Waist_Yaw"]
         
 @configclass
 class D9RoughEnvCfg_PLAY(D9RoughEnvCfg):

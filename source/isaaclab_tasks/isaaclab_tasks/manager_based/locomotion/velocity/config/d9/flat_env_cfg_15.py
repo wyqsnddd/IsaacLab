@@ -5,7 +5,7 @@
 
 from isaaclab.utils import configclass
 
-from .rough_env_cfg_16 import D9RoughEnvCfg
+from .rough_env_cfg_15 import D9RoughEnvCfg
 
 
 @configclass

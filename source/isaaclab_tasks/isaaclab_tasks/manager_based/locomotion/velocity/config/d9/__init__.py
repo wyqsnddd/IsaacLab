@@ -78,42 +78,42 @@ gym.register(
 )
 
 gym.register(
-    id="Isaac-Velocity-Flat-D9-14",
+    id="Isaac-Velocity-Flat-D9-15",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.flat_env_cfg_14:D9FlatEnvCfg",
-        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:D9FlatPPORunnerCfg14",
+        "env_cfg_entry_point": f"{__name__}.flat_env_cfg_15:D9FlatEnvCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:D9FlatPPORunnerCfg15",
     },
 )
 
 
 gym.register(
-    id="Isaac-Velocity-Flat-D9-Play-14",
+    id="Isaac-Velocity-Flat-D9-Play-15",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.flat_env_cfg_14:D9FlatEnvCfg_PLAY",
-        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:D9FlatPPORunnerCfg14",
+        "env_cfg_entry_point": f"{__name__}.flat_env_cfg_15:D9FlatEnvCfg_PLAY",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:D9FlatPPORunnerCfg15",
     },
 )
 
 gym.register(
-    id="Isaac-Velocity-Flat-D9-16",
+    id="Isaac-Velocity-Flat-D9-17",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.flat_env_cfg_16:D9FlatEnvCfg",
-        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:D9FlatPPORunnerCfg16",
+        "env_cfg_entry_point": f"{__name__}.flat_env_cfg_17:D9FlatEnvCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:D9FlatPPORunnerCfg17",
     },
 )
 
 gym.register(
-    id="Isaac-Velocity-Flat-D9-Play-16",
+    id="Isaac-Velocity-Flat-D9-Play-17",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.flat_env_cfg_16:D9FlatEnvCfg_PLAY",
-        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:D9FlatPPORunnerCfg16",
+        "env_cfg_entry_point": f"{__name__}.flat_env_cfg_17:D9FlatEnvCfg_PLAY",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:D9FlatPPORunnerCfg17",
     },
 )
