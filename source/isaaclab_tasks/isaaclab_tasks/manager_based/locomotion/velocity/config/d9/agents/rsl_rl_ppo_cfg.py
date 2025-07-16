@@ -45,6 +45,22 @@ class D9FlatPPORunnerCfg(D9RoughPPORunnerCfg):
         self.max_iterations = 2000
         self.experiment_name = "d9_flat"
 
+@configclass
+class D9FlatPPORunnerCfg14(D9RoughPPORunnerCfg):
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.max_iterations = 2000
+        self.experiment_name = "d9_14dof_flat"
+
+@configclass
+class D9FlatPPORunnerCfg16(D9RoughPPORunnerCfg):
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.max_iterations = 2000
+        self.experiment_name = "d9_16dof_flat"
+
 
 @configclass
 class D9RunPPORunnerCfg(RslRlOnPolicyRunnerCfg):
