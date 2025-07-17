@@ -142,7 +142,7 @@ PUDU_D9_15DOF_CFG = ArticulationCfg(
             },
             damping={
                 ".*_shoulder_pitch": 2.0,
-                "Waist_Joint_Yaw":5,
+                "Waist_Joint_Yaw":5.0,
             },
             armature=0.01,
         ),
