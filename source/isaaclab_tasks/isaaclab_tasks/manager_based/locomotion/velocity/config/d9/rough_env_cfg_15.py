@@ -7,7 +7,7 @@ from isaaclab.utils import configclass
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as mdp
 from isaaclab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityRoughEnvCfg
 
-from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards import utils_no_fly, joint_deviation_l2
+from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards import utils_no_fly, joint_deviation_l2, leg_arm_symmetric
 
 import math
 
@@ -57,14 +57,14 @@ class D9RewardsCfg:
     # ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.0)
 
     # dof contraints
-    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])})
-    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-0.005, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])})
-    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])})
+    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*"])})
+    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-0.005, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*", "Waist_Joint_Yaw"])})
+    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*", "Waist_Joint_Yaw"])})
 
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
         weight=-1.0,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])},
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*"])},
     )
     
     joint_deviation_hip = RewTerm(
@@ -93,6 +93,19 @@ class D9RewardsCfg:
         params={
             "asset_cfg": SceneEntityCfg(
                 "robot", joint_names=[".*_shoulder_pitch"]
+            )
+        },
+    )
+
+    leg_arm_symmetric_reward = RewTerm(
+        func = leg_arm_symmetric,
+        weight= 0.2,
+        params={
+            "asset_cfg_leg": SceneEntityCfg(
+                "robot", joint_names=["Left_Hip_Joint_Pitch", "Right_Hip_Joint_Pitch"]
+            ),
+            "asset_cfg_arm": SceneEntityCfg(
+                "robot", joint_names=["right_shoulder_pitch", "left_shoulder_pitch"]
             )
         },
     )

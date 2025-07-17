@@ -50,7 +50,7 @@ class D9FlatPPORunnerCfg15(D9RoughPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 2000
+        self.max_iterations = 5000
         self.experiment_name = "d9_15dof_flat"
 
 @configclass

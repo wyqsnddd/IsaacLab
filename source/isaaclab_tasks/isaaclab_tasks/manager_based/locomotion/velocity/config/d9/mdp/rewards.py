@@ -33,6 +33,23 @@ def joint_deviation_l2(
     # compute L2 norm (Euclidean norm)
     return torch.norm(angle, p=2, dim=1)
 
+def leg_arm_symmetric(
+        env: ManagerBasedRLEnv, 
+        asset_cfg_leg: SceneEntityCfg = SceneEntityCfg("robot"),
+        asset_cfg_arm: SceneEntityCfg = SceneEntityCfg("robot")
+) -> torch.Tensor:
+    """Penalize joint positions that deviate from the default one using L2 norm."""
+    # extract the used quantities (to enable type-hinting)
+    asset_leg: Articulation = env.scene[asset_cfg_leg.name]
+    asset_arm: Articulation = env.scene[asset_cfg_arm.name]
+
+    leg_pos = asset_leg.data.joint_vel[:, asset_cfg_leg.joint_ids] # - asset_leg.data.default_joint_pos[:, asset_cfg_leg.joint_ids]
+    arm_pos = asset_arm.data.joint_vel[:, asset_cfg_arm.joint_ids] # - asset_arm.data.default_joint_pos[:, asset_cfg_arm.joint_ids]
+    diff = leg_pos + arm_pos 
+
+    rew = torch.exp(-2 * torch.sum(diff ** 2, dim=1))
+    return rew 
+
 def alternating_air_time_reward(
     env: ManagerBasedRLEnv,
     sensor_cfg: SceneEntityCfg,
