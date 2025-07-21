@@ -64,3 +64,6 @@ _build
 
 # Teleop Recorded Dataset
 datasets
+
+
+source/isaaclab_assets/isaaclab_assets/external_assets/*

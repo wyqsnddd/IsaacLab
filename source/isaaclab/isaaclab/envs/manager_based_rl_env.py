@@ -170,6 +170,7 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
             A tuple containing the observations, rewards, resets (terminated and truncated) and extras.
         """
         # process actions
+
         self.action_manager.process_action(action.to(self.device))
 
         self.recorder_manager.record_pre_step()
