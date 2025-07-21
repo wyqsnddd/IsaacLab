@@ -230,7 +230,14 @@ class D9Rewards:
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_Yaw", ".*_Hip_Joint_Roll"])},
     )
 
+    joint_deviation_hip_pitch = RewTerm(
+        func=mdp.joint_deviation_l1,
+        weight=-0.2,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_Pitch"])},
+    )
+
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.0)
+
 
 @configclass
 class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
@@ -243,6 +250,12 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
         self.scene.robot = PUDU_D9_12DOF_UPDATED_ACTUATOR_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
         # self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/torso_link"
+
+        # 单独修改楼梯宽度
+        if self.scene.terrain.terrain_generator is not None:
+            self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs"].step_width = 0.5
+            self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_width = 0.5
+            self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_width = 0.65
 
         # Randomization
         # self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 3.0)
@@ -313,11 +326,46 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
 
         self.terminations.bad_orientation = None
 
+
 @configclass
 class D9RoughEnvEasyCfg_PLAY(D9RoughEnvEasyCfg):
+    def get_joint_info(self):
+        # robot = env.scene["robot"]
+        robot = self.scene.robot
+        # 1. 获取关节名称列表
+        # joint_names = robot.actuators.get_joint_names()
+        # print("关节名称列表:")
+        # for i, name in enumerate(joint_names):
+        #     print(f"  {i}: {name}")
+
+        # 2. 获取关节位置
+        # joint_pos = robot.data.joint_pos[0]  # 第一个实例
+        # print("\\n关节位置:")
+        # for i, (name, pos) in enumerate(zip(joint_names, joint_pos)):
+        #     print(f"  {i}: {name} = {pos:.3f}")
+
+        # # 3. 查找特定关节
+        # hip_pitch_indices, hip_pitch_names = robot.find_joints(".*_Hip_Joint_Pitch")
+        # print(f"\\n髋关节俯仰关节: {hip_pitch_indices} -> {hip_pitch_names}")
+
+        # 4. 获取执行器信息
+        for actuator_name, actuator in robot.actuators.items():
+            print(f"\\n执行器 {actuator_name}:")
+            print(f"  关节索引: {actuator.joint_indices}")
+            # print(f"  关节名称: {[joint_names[i] for i in actuator.joint_indices]}")
+            print(f"  关节数量: {actuator.num_joints}")
+            print(f"  关节类型: {actuator.class_type}")
+            print(f"  关节摩擦: {actuator.friction}")
+
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
+
+        # 单独修改楼梯宽度
+        if self.scene.terrain.terrain_generator is not None:
+            self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs"].step_width = 0.5
+            self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_width = 0.5
+            self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_width = 0.65
 
         # make a smaller scene for play
         self.scene.num_envs = 50
@@ -331,7 +379,7 @@ class D9RoughEnvEasyCfg_PLAY(D9RoughEnvEasyCfg):
             self.scene.terrain.terrain_generator.num_cols = 5
             self.scene.terrain.terrain_generator.curriculum = False
 
-        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (0.5, 0.5)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
         self.commands.base_velocity.ranges.heading = (0.0, 0.0)
@@ -340,3 +388,5 @@ class D9RoughEnvEasyCfg_PLAY(D9RoughEnvEasyCfg):
         # remove random pushing
         self.events.base_external_force_torque = None
         self.events.push_robot = None
+
+        # self.get_joint_info()
