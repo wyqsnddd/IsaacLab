@@ -5,11 +5,11 @@
 
 from isaaclab.utils import configclass
 
-from .rough_env_cfg import D9RoughEnvCfg
+from .rough_env_cfg_12dof import X1RoughEnv12DofCfg
 
 
 @configclass
-class D9FlatEnvCfg(D9RoughEnvCfg):
+class X1FlatEnv12DofCfg(X1RoughEnv12DofCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
@@ -23,29 +23,16 @@ class D9FlatEnvCfg(D9RoughEnvCfg):
         # no terrain curriculum
         self.curriculum.terrain_levels = None
 
-        self.rewards.base_height.weight = -2.0
-        self.rewards.track_lin_vel_xy_exp.weight = 1.5
-        self.rewards.track_ang_vel_z_exp.weight = 1.0
 
-        self.rewards.dof_torques_l2.weight = -1e-05
-        self.rewards.dof_acc_l2.weight = -2.5e-07
-
-        self.rewards.feet_air_time.weight = 1.5
-        self.rewards.feet_air_time.params["threshold"] = 0.6
-
-        self.rewards.flat_orientation_l2.weight = -1.0
-
-        self.rewards.dof_pos_limits.weight = -1.0
-
-        self.rewards.joint_deviation_hip.weight = -0.1
-
-
-class D9FlatEnvCfg_PLAY(D9FlatEnvCfg):
+class X1FlatEnv12DofCfg_PLAY(X1FlatEnv12DofCfg):
     def __post_init__(self) -> None:
         # post init of parent
         super().__post_init__()
 
+
         # make a smaller scene for play
+        self.is_finite_horizon = True
+        self.episode_length_s = 5.0
         self.scene.num_envs = 50
         self.scene.env_spacing = 2.5
         # disable randomization for play
@@ -55,6 +42,6 @@ class D9FlatEnvCfg_PLAY(D9FlatEnvCfg):
         self.events.push_robot = None
 
         self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
-        self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)
+        self.commands.base_velocity.ranges.lin_vel_y = (-0., 0.)
         self.commands.base_velocity.ranges.ang_vel_z = (-0, 0)
-        self.commands.base_velocity.ranges.heading = (-0.0, 0.0)
+        self.commands.base_velocity.ranges.heading = (-0., 0.)
