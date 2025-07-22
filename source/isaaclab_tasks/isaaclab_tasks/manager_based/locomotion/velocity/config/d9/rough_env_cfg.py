@@ -3,9 +3,6 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-##
-# Pre-defined configs
-##
 from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_12DOF_CFG  # noqa F401
 
 from isaaclab.managers import RewardTermCfg as RewTerm
@@ -87,7 +84,6 @@ class D9RewardsCfg:
             )
         },
     )
-
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
         weight=-1.0,

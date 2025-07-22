@@ -44,10 +44,12 @@
         <inertial pos="0.0748934 -2.9267e-09 0.00660401" quat="-0.00149641 0.718622 0.00141032 0.695398" mass="2.13764" diaginertia="0.00346954 0.00245677 0.0020506"/>
         <joint name="Left_Hip_Joint_Roll" pos="0 0 0" axis="-1 0 0" range="-0.43633 0.17453" actuatorfrcrange="-189 189"/>
         <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.866667 0.909804 1 1" mesh="Left_Link_Hip_Roll"/>
+        <geom type="mesh" rgba="0.866667 0.909804 1 1" mesh="Left_Link_Hip_Roll"/>        
         <body name="Left_Link_Hip_Yaw" pos="0.078 0 -0.01">
           <inertial pos="0.000121769 -0.00522351 -0.0971839" quat="0.700507 0.0875154 0.0582872 0.705857" mass="3.32035" diaginertia="0.00753063 0.005721 0.00534254"/>
           <joint name="Left_Hip_Joint_Yaw" pos="0 0 0" axis="0 0 1" range="-0.698 0.698" actuatorfrcrange="-144 144"/>
           <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.866667 0.909804 1 1" mesh="Left_Link_Hip_Yaw"/>
+          <geom type="mesh" rgba="0.866667 0.909804 1 1" mesh="Left_Link_Hip_Yaw"/>
           <body name="Left_Link_Hip_Pitch" pos="0 0.03 -0.1075">
             <inertial pos="-0.000296362 -0.0161508 -0.140732" quat="0.626212 -0.0203457 0.00913277 0.779334" mass="4.20004" diaginertia="0.0221103 0.0217282 0.00762621"/>
             <joint name="Left_Hip_Joint_Pitch" pos="0 0 0" axis="0 -1 0" range="-0.9599 1.5708" actuatorfrcrange="-352 352"/>

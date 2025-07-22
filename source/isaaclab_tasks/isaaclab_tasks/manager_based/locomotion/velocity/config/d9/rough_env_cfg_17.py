@@ -1,4 +1,4 @@
-from isaaclab_assets.external_assets.assets.x1 import X1_12DOF_CFG
+from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_17DOF_CFG # noqa F401
 
 from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
@@ -6,14 +6,15 @@ from isaaclab.utils import configclass
 
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as mdp
 from isaaclab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityRoughEnvCfg
-from isaaclab_tasks.manager_based.locomotion.velocity.config.x1.mdp.rewards import utils_no_fly, joint_deviation_l2
+
+from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards import utils_no_fly, joint_deviation_l2
+
 import math
-from isaaclab.utils.datasets import HDF5DatasetFileHandler
-from isaaclab_tasks.manager_based.locomotion.velocity.config.x1.mdp.record import PreStepActionsRecorderCfg, PostStepTorqueRecorderCfg, PreStepStatesRecorderCfg
-from isaaclab.managers.recorder_manager import RecorderManagerBaseCfg
+
+
 
 @configclass
-class X1Rewards12DOFCfg:
+class D9RewardsCfg:
     """Reward terms for the MDP."""
     # main reward
     track_lin_vel_xy_exp = RewTerm(
@@ -22,12 +23,11 @@ class X1Rewards12DOFCfg:
     track_ang_vel_z_exp = RewTerm(
         func=mdp.track_ang_vel_z_exp, weight=0.5, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
-
     feet_air_time = RewTerm(
         func=mdp.feet_air_time,
         weight=3,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="Ankle_Roll_.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Link_Ankle_Roll"),
             "command_name": "base_velocity",
             "threshold": 0.6,
         },
@@ -37,20 +37,19 @@ class X1Rewards12DOFCfg:
         func = utils_no_fly,
         weight=0.25,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="Ankle_Roll_.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Link_Ankle_Roll"),
         },        
     )
 
     # base contraints
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-1.0)
-
     base_height = RewTerm(
         func=mdp.base_height_l2,
         weight = -5.0,
         params={
-            "target_height": 1.08,
+            "target_height": 0.88,
             "asset_cfg": SceneEntityCfg(
-                "robot", body_names=["Base_Link"]
+                "robot", body_names=["base_link"]
             )
         },
     )
@@ -58,14 +57,14 @@ class X1Rewards12DOFCfg:
     # ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.0)
 
     # dof contraints
-    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*"])})
-    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-0.005, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*"])})
-    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*"])})
+    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])})
+    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-0.005, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])})
+    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])})
 
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
-        weight=-5.0,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*"])},
+        weight=-1.0,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])},
     )
     
     joint_deviation_hip = RewTerm(
@@ -73,56 +72,54 @@ class X1Rewards12DOFCfg:
         weight=-0.1,
         params={
             "asset_cfg": SceneEntityCfg(
-                "robot", joint_names=["Joint_Hip_Roll_.*", "Joint_Hip_Yaw_.*"]
+                "robot", joint_names=[".*_Hip_Joint_Yaw", ".*_Hip_Joint_Roll"]
+            )
+        },
+    )
+
+    joint_deviation_waist = RewTerm(
+        func = joint_deviation_l2,
+        weight=-2.0,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_names=["Waist_Joint_Yaw"]
+            )
+        },
+    )
+
+    joint_deviation_shoulder = RewTerm(
+        func = joint_deviation_l2,
+        weight=-0.1,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_names=[".*_shoulder_pitch", ".*_shoulder_roll"]
             )
         },
     )
 
 @configclass
-class X1RecordCfg(RecorderManagerBaseCfg):
-    dataset_file_handler_class_type: type = HDF5DatasetFileHandler
-
-    dataset_export_dir_path: str = "tmp/isaaclab/logs"
-    """The directory path where the recorded datasets are exported."""
-
-    dataset_filename: str = "dataset"
-    """Dataset file name without file extension."""
-
-    dataset_export_mode: 1 # Export all episodes to a single dataset file
-    """The mode to handle episode exports."""
-
-    export_in_record_pre_reset: bool = True
-    """Whether to export episodes in the record_pre_reset call."""
-
-    record_post_step_torques = PostStepTorqueRecorderCfg()
-    record_pre_step_states = PreStepStatesRecorderCfg()
-    record_pre_step_actions = PreStepActionsRecorderCfg()
-
-@configclass
-class X1RoughEnv12DofCfg(LocomotionVelocityRoughEnvCfg):
-    rewards: X1Rewards12DOFCfg = X1Rewards12DOFCfg()
-    # recorders: object = X1RecordCfg()
+class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
+    rewards: D9RewardsCfg = D9RewardsCfg()
 
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
         # Scene
-
-        self.scene.robot = X1_12DOF_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
-        self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/Base_Link"
+        self.scene.robot = PUDU_D9_17DOF_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
 
         # Randomization
         # self.events.push_robot = None
         # self.events.add_base_mass = None
-        self.events.add_base_mass.params["asset_cfg"].body_names = ["Base_Link"]
-        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["Base_Link"]
+        self.events.add_base_mass.params["asset_cfg"].body_names = ["Waist_Yaw"]
+        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["Waist_Yaw"]
 
         # terminations
         self.actions.joint_pos.scale = 0.25
-        self.terminations.base_contact.params["sensor_cfg"].body_names = ["Base_Link"]
+        self.terminations.base_contact.params["sensor_cfg"].body_names = ["Waist_Yaw"]
         
 @configclass
-class X1RoughEnv12DofCfg_PLAY(X1RoughEnv12DofCfg):
+class D9RoughEnvCfg_PLAY(D9RoughEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()

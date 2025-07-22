@@ -10,7 +10,6 @@ import isaaclab.sim as sim_utils
 from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.assets import ArticulationCfg
 
-
 """Configuration for the X1 Humanoid robot."""
 
 X1_12DOF_CFG = ArticulationCfg(

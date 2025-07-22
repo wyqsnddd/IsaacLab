@@ -8,7 +8,7 @@
 ##
 # TODO: import PUDU_D9
 # from isaaclab_assets import G1_MINIMAL_CFG  # isort: skip
-from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_12DOF_UPDATED_ACTUATOR_CFG  # noqa F401
+from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_12DOF_CFG  # noqa F401
 
 from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg, TerminationTermCfg
@@ -173,6 +173,7 @@ class D9Rewards:
     )
 
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-1.0)
+    flat_orientation_l1 = RewTerm(func=mdp.flat_orientation_l1, weight=-1.0)
 
     base_height = RewTerm(
         func=mdp.base_height_l2,
@@ -247,7 +248,7 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
         # post init of parent
         super().__post_init__()
         # Scene
-        self.scene.robot = PUDU_D9_12DOF_UPDATED_ACTUATOR_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.robot = PUDU_D9_12DOF_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
         # self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/torso_link"
 
@@ -270,7 +271,8 @@ class D9RoughEnvEasyCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.track_ang_vel_z_exp.weight = 1.6
         self.rewards.feet_air_time.weight = 3.0
         self.rewards.no_fly.weight = 0.75
-        self.rewards.flat_orientation_l2.weight = -1.0
+        self.rewards.flat_orientation_l2.weight = 0.0
+        self.rewards.flat_orientation_l1.weight = -2.0
         self.rewards.base_height.weight = -5.0
         self.rewards.phase_contact_reward.weight = 1.0
         self.rewards.feet_slide.weight = -0.0
