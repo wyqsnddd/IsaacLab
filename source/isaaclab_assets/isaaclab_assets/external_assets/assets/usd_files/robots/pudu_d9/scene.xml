@@ -1,5 +1,5 @@
 <mujoco model="pudu scene">
-  <include file="d9_12dof.xml"/>
+  <include file="d9_15dof.xml"/>
 
   <statistic center="1.0 0.7 1.0" extent="0.8"/>
 

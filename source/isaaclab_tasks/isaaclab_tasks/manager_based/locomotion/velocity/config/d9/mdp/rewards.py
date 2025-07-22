@@ -45,7 +45,7 @@ def leg_arm_symmetric(
 
     leg_pos = asset_leg.data.joint_vel[:, asset_cfg_leg.joint_ids] # - asset_leg.data.default_joint_pos[:, asset_cfg_leg.joint_ids]
     arm_pos = asset_arm.data.joint_vel[:, asset_cfg_arm.joint_ids] # - asset_arm.data.default_joint_pos[:, asset_cfg_arm.joint_ids]
-    diff = leg_pos + arm_pos 
+    diff = leg_pos - arm_pos 
 
     rew = torch.exp(-2 * torch.sum(diff ** 2, dim=1))
     return rew 
