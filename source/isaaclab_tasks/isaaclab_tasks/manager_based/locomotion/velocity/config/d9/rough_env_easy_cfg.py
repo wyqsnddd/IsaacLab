@@ -25,6 +25,7 @@ from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards impo
     utils_no_fly,
     kicking_penalty,
 )
+
 from isaaclab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import (  # noqa F401
     LocomotionVelocityRoughEnvCfg,
     RewardsCfg,
