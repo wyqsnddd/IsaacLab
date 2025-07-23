@@ -3,8 +3,6 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-"""This sub-module contains the reward functions that can be used for D9's locomotion task."""
-
 from __future__ import annotations
 
 import torch
@@ -16,6 +14,50 @@ from isaaclab.sensors import ContactSensor
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
+
+
+def utils_no_fly(
+    env: ManagerBasedRLEnv,
+    sensor_cfg: SceneEntityCfg,
+) -> torch.Tensor:
+    """Penalty: return 1 if exactly one foot is in contact (no flying), else 0."""
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    forces = contact_sensor.data.net_forces_w_history[:, -1, sensor_cfg.body_ids, 2]
+    contacts = forces > 0.1
+    single = torch.sum(contacts.float(), dim=1) == 1
+    return single.float()
+
+
+def joint_deviation_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    """Penalize joint positions that deviate from the default one using L2 norm."""
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    # compute out of limits constraints
+    angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+    # compute L2 norm (Euclidean norm)
+    return torch.norm(angle, p=2, dim=1)
+
+
+def leg_arm_symmetric(
+    env: ManagerBasedRLEnv,
+    asset_cfg_leg: SceneEntityCfg = SceneEntityCfg("robot"),
+    asset_cfg_arm: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Penalize joint positions that deviate from the default one using L2 norm."""
+    # extract the used quantities (to enable type-hinting)
+    asset_leg: Articulation = env.scene[asset_cfg_leg.name]
+    asset_arm: Articulation = env.scene[asset_cfg_arm.name]
+
+    leg_pos = asset_leg.data.joint_vel[
+        :, asset_cfg_leg.joint_ids
+    ]  # - asset_leg.data.default_joint_pos[:, asset_cfg_leg.joint_ids]
+    arm_pos = asset_arm.data.joint_vel[
+        :, asset_cfg_arm.joint_ids
+    ]  # - asset_arm.data.default_joint_pos[:, asset_cfg_arm.joint_ids]
+    diff = leg_pos - arm_pos
+
+    rew = torch.exp(-2 * torch.sum(diff**2, dim=1))
+    return rew
 
 
 def alternating_air_time_reward(
@@ -234,8 +276,8 @@ def biped_gait_reward(
     contact_time_diff = torch.square(contact_times[:, 0] - contact_times[:, 1])
 
     # Clip errors
-    air_time_diff = torch.clip(air_time_diff, max=max_err ** 2)
-    contact_time_diff = torch.clip(contact_time_diff, max=max_err ** 2)
+    air_time_diff = torch.clip(air_time_diff, max=max_err**2)
+    contact_time_diff = torch.clip(contact_time_diff, max=max_err**2)
 
     # Calculate reward using exponential kernel
     sync_reward = torch.exp(-(air_time_diff + contact_time_diff) / std)
@@ -245,19 +287,6 @@ def biped_gait_reward(
     body_vel = torch.linalg.norm(asset.data.root_lin_vel_b[:, :2], dim=1)
 
     return torch.where(torch.logical_or(cmd > 0.0, body_vel > velocity_threshold), sync_reward, 0.0)
-
-
-def utils_no_fly(
-    env: ManagerBasedRLEnv,  # W: Trailing whitespace
-    sensor_cfg: SceneEntityCfg,
-) -> torch.Tensor:
-    """Penalty: return 1 if exactly one foot is in contact (no flying), else 0."""
-
-    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
-    forces = contact_sensor.data.net_forces_w_history[:, -1, sensor_cfg.body_ids, 2]
-    contacts = forces > 0.1
-    single = torch.sum(contacts.float(), dim=1) == 1
-    return single.float()
 
 
 def energy_efficiency_reward(env, asset_cfg: SceneEntityCfg) -> torch.Tensor:
@@ -313,64 +342,64 @@ def kicking_penalty(
     std: float = 0.25,
 ) -> torch.Tensor:
     """Penalize contact forces that violate the friction cone constraint.
-    
+
     This function penalizes tangential contact forces that are too large relative to the normal force,
     which would indicate slipping or improper foot-ground interaction. Forces are properly decomposed
     using projection operators relative to the gravity direction.
-    
+
     Args:
         env: The RL environment instance.
         sensor_cfg: Configuration for the contact sensor.
         friction_coefficient: The coefficient of friction between the foot and ground.
         std: Standard deviation for the exponential kernel to smooth the penalty.
-        
+
     Returns:
         A negative reward (penalty) that is larger when friction cone violations are more severe.
     """
     contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
-    
+
     # Get contact forces for all feet
     contact_forces = contact_sensor.data.net_forces_w[:, sensor_cfg.body_ids, :3]
-    
+
     # Define gravity direction (assuming z-up coordinate system)
     gravity_dir = torch.tensor([0.0, 0.0, 1.0], device=contact_forces.device)
-    
+
     # Project forces onto gravity direction to get normal components
     # P = vv^T where v is the normalized gravity direction
     gravity_dir_normal = gravity_dir / torch.norm(gravity_dir)
     projection_matrix = torch.outer(gravity_dir_normal, gravity_dir_normal)
-    
+
     # Reshape forces for batch matrix multiplication
     batch_size = contact_forces.shape[0]
     num_feet = contact_forces.shape[1]
     forces_reshaped = contact_forces.reshape(-1, 3)
-    
+
     # Calculate normal forces using projection
     normal_forces = torch.matmul(forces_reshaped, projection_matrix)
     normal_forces = normal_forces.reshape(batch_size, num_feet, 3)
-    
+
     # Calculate tangential forces using null-space projection
     # I - P gives us the null-space projector
     null_space_matrix = torch.eye(3, device=contact_forces.device) - projection_matrix
     tangential_forces = torch.matmul(forces_reshaped, null_space_matrix)
     tangential_forces = tangential_forces.reshape(batch_size, num_feet, 3)
-    
+
     # Get magnitudes
     normal_magnitude = torch.norm(normal_forces, dim=-1)
     tangential_magnitude = torch.norm(tangential_forces, dim=-1)
-    
+
     # Calculate the maximum allowed tangential force based on friction cone
     max_tangential = friction_coefficient * torch.abs(normal_magnitude)
-    
+
     # Calculate how much the tangential force exceeds the friction cone
     violation = torch.clamp(tangential_magnitude - max_tangential, min=0.0)
-    
+
     # Apply exponential penalty to smooth the transition
     penalty = torch.exp(-violation / std)
-    
+
     # Only apply penalty when there is actual contact (normal force > 0)
     mask = normal_magnitude > 0.0
     penalty = torch.where(mask, penalty, torch.ones_like(penalty))
-    
+
     # Return negative reward (penalty)
     return -torch.mean(penalty, dim=1)

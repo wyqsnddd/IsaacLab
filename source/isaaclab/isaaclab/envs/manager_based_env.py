@@ -386,6 +386,7 @@ class ManagerBasedEnv:
             A tuple containing the observations and extras.
         """
         # process actions
+
         self.action_manager.process_action(action.to(self.device))
 
         self.recorder_manager.record_pre_step()

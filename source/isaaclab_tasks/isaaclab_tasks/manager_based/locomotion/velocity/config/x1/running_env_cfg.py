@@ -4,24 +4,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from isaaclab.envs import mdp as mdp
-from isaaclab.managers import CurriculumTermCfg as CurrTerm
 from isaaclab.utils import configclass
 
 import math
-from .rough_env_easy_cfg import D9RoughEnvEasyCfg
+from .rough_env_cfg import X1RoughEnvCfg
 
 
 @configclass
-class CurriculumCfg:
-    """Curriculum terms for the MDP."""
-
-    phase_contact_reward = CurrTerm(
-        func=mdp.modify_reward_weight, params={"term_name": "phase_contact_reward", "weight": 1.0, "num_steps": 800}
-    )
-
-
-@configclass
-class D9RunningEnvCfg(D9RoughEnvEasyCfg):
+class X1RunningEnvCfg(X1RoughEnvCfg):
 
     # curriculum: CurriculumCfg = CurriculumCfg()
 
@@ -50,7 +40,6 @@ class D9RunningEnvCfg(D9RoughEnvEasyCfg):
         self.rewards.flat_orientation_l2.weight = -1.0
         self.rewards.base_height.weight = -5.0
 
-
         # Echo the running rewards
 
         self.rewards.feet_air_time_biped.weight = 0
@@ -76,14 +65,13 @@ class D9RunningEnvCfg(D9RoughEnvEasyCfg):
 
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
-            "base_link",
-            "Waist_Yaw",
-            ".*_Hip_.*",
-            ".*_Knee_Pitch",
+            "Base_Link",
+            "Hip_.*",
+            "Knee_.*",
         ]
 
 
-class D9RunningEnvCfg_PLAY(D9RunningEnvCfg):
+class X1RunningEnvCfg_PLAY(X1RunningEnvCfg):
     def __post_init__(self) -> None:
         # post init of parent
         super().__post_init__()

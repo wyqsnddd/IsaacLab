@@ -1,9 +1,4 @@
-# Copyright (c) 2022-2025, The Isaac Lab Project Developers.
-# All rights reserved.
-#
-# SPDX-License-Identifier: BSD-3-Clause
-
-from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_12DOF_CFG  # noqa F401
+from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_17DOF_CFG # noqa F401
 
 from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
@@ -17,10 +12,10 @@ from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards impo
 import math
 
 
+
 @configclass
 class D9RewardsCfg:
     """Reward terms for the MDP."""
-
     # main reward
     track_lin_vel_xy_exp = RewTerm(
         func=mdp.track_lin_vel_xy_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
@@ -37,69 +32,70 @@ class D9RewardsCfg:
             "threshold": 0.6,
         },
     )
-
+    
     no_fly = RewTerm(
-        func=utils_no_fly,
+        func = utils_no_fly,
         weight=0.25,
         params={
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Link_Ankle_Roll"),
-        },
+        },        
     )
 
-    # base constraints
+    # base contraints
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-1.0)
     base_height = RewTerm(
         func=mdp.base_height_l2,
-        weight=-5.0,
-        params={"target_height": 0.88, "asset_cfg": SceneEntityCfg("robot", body_names=["base_link"])},
+        weight = -5.0,
+        params={
+            "target_height": 0.88,
+            "asset_cfg": SceneEntityCfg(
+                "robot", body_names=["base_link"]
+            )
+        },
     )
     # lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-0.0)
     # ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.0)
 
-    # dof constraints
-    dof_torques_l2 = RewTerm(
-        func=mdp.joint_torques_l2,
-        weight=-1.0e-5,
-        params={
-            "asset_cfg": SceneEntityCfg(
-                "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"]
-            )
-        },
-    )
-    dof_vel_l2 = RewTerm(
-        func=mdp.joint_vel_l2,
-        weight=-0.005,
-        params={
-            "asset_cfg": SceneEntityCfg(
-                "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"]
-            )
-        },
-    )
-    dof_acc_l2 = RewTerm(
-        func=mdp.joint_acc_l2,
-        weight=-2.5e-7,
-        params={
-            "asset_cfg": SceneEntityCfg(
-                "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"]
-            )
-        },
-    )
+    # dof contraints
+    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])})
+    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-0.005, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])})
+    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])})
+
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
         weight=-1.0,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])},
+    )
+    
+    joint_deviation_hip = RewTerm(
+        func = joint_deviation_l2,
+        weight=-0.1,
         params={
             "asset_cfg": SceneEntityCfg(
-                "robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"]
+                "robot", joint_names=[".*_Hip_Joint_Yaw", ".*_Hip_Joint_Roll"]
             )
         },
     )
 
-    joint_deviation_hip = RewTerm(
-        func=joint_deviation_l2,
-        weight=-0.1,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_Yaw", ".*_Hip_Joint_Roll"])},
+    joint_deviation_waist = RewTerm(
+        func = joint_deviation_l2,
+        weight=-2.0,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_names=["Waist_Joint_Yaw"]
+            )
+        },
     )
 
+    joint_deviation_shoulder = RewTerm(
+        func = joint_deviation_l2,
+        weight=-0.1,
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_names=[".*_shoulder_pitch", ".*_shoulder_roll"]
+            )
+        },
+    )
 
 @configclass
 class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
@@ -109,7 +105,7 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # post init of parent
         super().__post_init__()
         # Scene
-        self.scene.robot = PUDU_D9_12DOF_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.robot = PUDU_D9_17DOF_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
 
         # Randomization
@@ -121,8 +117,7 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # terminations
         self.actions.joint_pos.scale = 0.25
         self.terminations.base_contact.params["sensor_cfg"].body_names = ["Waist_Yaw"]
-
-
+        
 @configclass
 class D9RoughEnvCfg_PLAY(D9RoughEnvCfg):
     def __post_init__(self):
@@ -140,11 +135,6 @@ class D9RoughEnvCfg_PLAY(D9RoughEnvCfg):
             self.scene.terrain.terrain_generator.num_rows = 5
             self.scene.terrain.terrain_generator.num_cols = 5
             self.scene.terrain.terrain_generator.curriculum = False
-
-        self.commands.base_velocity.ranges.lin_vel_x = (0.5, 0.5)
-        self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
-        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
-        self.commands.base_velocity.ranges.heading = (0.0, 0.0)
 
         # disable randomization for play
         self.observations.policy.enable_corruption = False
