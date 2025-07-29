@@ -236,9 +236,9 @@ class D9RoughEnvCfg15(LocomotionVelocityRoughEnvCfg):
         self.actions.joint_pos.scale = 0.25
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
             "Waist_Yaw",
-            ".*_Hip_.*",
-            ".*_Knee_Pitch",
-            "base_link",
+            # ".*_Hip_.*",
+            # ".*_Knee_Pitch",
+            # "base_link",
         ]
 
         # Add bad orientation termination
