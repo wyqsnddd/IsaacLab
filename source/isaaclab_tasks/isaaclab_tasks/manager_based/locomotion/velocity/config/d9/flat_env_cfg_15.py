@@ -2,18 +2,32 @@
 # All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
-
+from isaaclab_assets.external_assets.assets.pudu_d9 import PUDU_D9_15DOF_CFG # noqa F401
 from isaaclab.utils import configclass
-
-from .rough_env_cfg_15 import D9RoughEnvCfg
-
-
+from .rough_env_cfg_15 import D9RewardsCfg
+from isaaclab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityRoughEnvCfg
 
 @configclass
-class D9FlatEnvCfg(D9RoughEnvCfg):
+class D9FlatEnvCfg(LocomotionVelocityRoughEnvCfg):
+    rewards: D9RewardsCfg = D9RewardsCfg()
+
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
+
+        self.scene.robot = PUDU_D9_15DOF_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
+
+        # Randomization
+        # self.events.push_robot = None
+        # self.events.add_base_mass = None
+        self.events.base_com = None
+        self.events.add_base_mass.params["asset_cfg"].body_names = ["Waist_Yaw"]
+        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["Waist_Yaw"]
+
+        # terminations
+        self.actions.joint_pos.scale = 0.25
+        self.terminations.base_contact.params["sensor_cfg"].body_names = ["Waist_Yaw"]
 
         # change terrain to flat
         self.scene.terrain.terrain_type = "plane"

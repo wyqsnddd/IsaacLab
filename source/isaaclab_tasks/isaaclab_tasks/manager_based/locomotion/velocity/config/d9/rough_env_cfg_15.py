@@ -12,33 +12,35 @@ from isaaclab_tasks.manager_based.locomotion.velocity.config.d9.mdp.rewards impo
 import math
 
 from isaaclab.utils.datasets import HDF5DatasetFileHandler
-from isaaclab_tasks.manager_based.locomotion.velocity.config.x1.mdp.record import PreStepActionsRecorderCfg, PostStepTorqueRecorderCfg, PreStepStatesRecorderCfg
+# from isaaclab_tasks.manager_based.locomotion.velocity.config.x1.mdp.record import PreStepActionsRecorderCfg, PostStepTorqueRecorderCfg, PreStepStatesRecorderCfg
 from isaaclab.managers.recorder_manager import RecorderManagerBaseCfg
 
-@configclass
-class X1RecordCfg(RecorderManagerBaseCfg):
-    dataset_file_handler_class_type: type = HDF5DatasetFileHandler
+# @configclass
+# class X1RecordCfg(RecorderManagerBaseCfg):
+#     dataset_file_handler_class_type: type = HDF5DatasetFileHandler
 
-    dataset_export_dir_path: str = "tmp/isaaclab/logs"
-    """The directory path where the recorded datasets are exported."""
+#     dataset_export_dir_path: str = "tmp/isaaclab/logs"
+#     """The directory path where the recorded datasets are exported."""
 
-    dataset_filename: str = "d9_15dof"
-    """Dataset file name without file extension."""
+#     dataset_filename: str = "d9_15dof"
+#     """Dataset file name without file extension."""
 
-    dataset_export_mode: 1 # Export all episodes to a single dataset file
-    """The mode to handle episode exports."""
+#     dataset_export_mode: 1 # Export all episodes to a single dataset file
+#     """The mode to handle episode exports."""
 
-    export_in_record_pre_reset: bool = True
-    """Whether to export episodes in the record_pre_reset call."""
+#     export_in_record_pre_reset: bool = True
+#     """Whether to export episodes in the record_pre_reset call."""
 
-    record_post_step_torques = PostStepTorqueRecorderCfg()
-    record_pre_step_states = PreStepStatesRecorderCfg()
-    record_pre_step_actions = PreStepActionsRecorderCfg()
+#     record_post_step_torques = PostStepTorqueRecorderCfg()
+#     record_pre_step_states = PreStepStatesRecorderCfg()
+#     record_pre_step_actions = PreStepActionsRecorderCfg()
 
 @configclass
 class D9RewardsCfg:
     """Reward terms for the MDP."""
     # main reward
+
+    # termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
     track_lin_vel_xy_exp = RewTerm(
         func=mdp.track_lin_vel_xy_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
@@ -75,16 +77,21 @@ class D9RewardsCfg:
             )
         },
     )
-    # lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-0.0)
-    # ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.0)
+    
+    feet_slide = RewTerm(
+        func=mdp.feet_slide,
+        weight=-0.1,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_Link_Ankle_Roll"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_Link_Ankle_Roll"),
+        },
+    )
 
     # dof contraints
     dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*"])})
     dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-0.005, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*", "Waist_Joint_Yaw"])})
     dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*", "Waist_Joint_Yaw"])})
-    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*"])})
-    dof_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-0.005, params={"asset_cfg": SceneEntityCfg("robot", joint_names=["Waist_Joint_Yaw", ".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])})
-    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7, params={"asset_cfg": SceneEntityCfg("robot", joint_names=["Waist_Joint_Yaw", ".*_Hip_Joint_.*", ".*_Knee_Joint_Pitch", ".*_Ankle_Joint_.*"])})
+    action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)
 
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
@@ -152,15 +159,54 @@ class D9RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
 
         # Randomization
-        # self.events.push_robot = None
-        # self.events.add_base_mass = None
-        self.events.add_base_mass.params["asset_cfg"].body_names = ["Waist_Yaw"]
+        self.events.push_robot = None
+        self.events.add_base_mass = None
+        self.events.base_com = None
+        self.events.reset_robot_joints.params["position_range"] = (1.0, 1.0)
         self.events.base_external_force_torque.params["asset_cfg"].body_names = ["Waist_Yaw"]
+        self.events.reset_base.params = {
+            "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
+            "velocity_range": {
+                "x": (0.0, 0.0),
+                "y": (0.0, 0.0),
+                "z": (0.0, 0.0),
+                "roll": (0.0, 0.0),
+                "pitch": (0.0, 0.0),
+                "yaw": (0.0, 0.0),
+            },
+        }
 
         # terminations
         self.actions.joint_pos.scale = 0.25
         self.terminations.base_contact.params["sensor_cfg"].body_names = ["Waist_Yaw"]
         
+        # Commands
+        self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+
+        # reward
+        self.rewards.joint_deviation_shoulder.weight = -0.2
+        self.rewards.joint_deviation_hip.weight = -0.2
+
+        self.rewards.base_height.weight = 0.0
+        self.rewards.dof_torques_l2.weight = 0.0
+        self.rewards.dof_vel_l2.weight = 0.0
+        self.rewards.action_rate_l2.weight = -0.005
+        self.rewards.dof_acc_l2.weight = -1.25e-7
+
+        self.rewards.leg_arm_symmetric_reward.weight = 0.0
+
+        # terrain
+        if self.scene.terrain.terrain_generator is not None:
+            self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs"].step_width = 0.5
+            self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs"].step_height_range = (0.05, 0.1)
+            self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_width = 0.5
+            self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_height_range = (0.05, 0.1)
+            self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_width = 0.65
+            self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_height_range = (0.05, 0.1)
+        
+
 @configclass
 class D9RoughEnvCfg_PLAY(D9RoughEnvCfg):
     def __post_init__(self):
@@ -184,3 +230,7 @@ class D9RoughEnvCfg_PLAY(D9RoughEnvCfg):
         # remove random pushing
         self.events.base_external_force_torque = None
         self.events.push_robot = None
+
+        self.commands.base_velocity.ranges.lin_vel_x = (0.5, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)

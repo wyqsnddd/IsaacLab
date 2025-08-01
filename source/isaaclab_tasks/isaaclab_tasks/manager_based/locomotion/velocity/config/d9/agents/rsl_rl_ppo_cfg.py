@@ -54,12 +54,13 @@ class D9FlatPPORunnerCfg15(D9RoughPPORunnerCfg):
         self.experiment_name = "d9_15dof_flat"
 
 @configclass
-class D9FlatPPORunnerCfg17(D9RoughPPORunnerCfg):
+class D9RoughPPORunnerCfg15(D9RoughPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 2000
-        self.experiment_name = "d9_17dof_flat"
+        self.max_iterations = 10000
+        self.experiment_name = "d9_15dof_rough"
+        self.algorithm.learning_rate = 1.0e-4
 
 
 @configclass
