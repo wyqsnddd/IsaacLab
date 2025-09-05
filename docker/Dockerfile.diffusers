@@ -1,0 +1,95 @@
+# Base image
+FROM isaac-lab-mc_rtc:latest AS diffusers
+
+RUN apt-get -y update \
+    && apt-get install -y software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa
+
+RUN apt install -y bash \
+    build-essential \
+    git \
+    git-lfs \
+    curl \
+    ca-certificates \
+    libsndfile1-dev \
+    libgl1 \
+    python3.10 \
+    python3.10-dev \
+    python3-pip \
+    python3.10-venv && \
+    rm -rf /var/lib/apt/lists
+
+# make sure to use venv
+RUN python3.10 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+
+# Install Miniconda on x86 or ARM platforms
+RUN arch=$(uname -m) && \
+    if [ "$arch" = "x86_64" ]; then \
+    MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"; \
+    elif [ "$arch" = "aarch64" ]; then \
+    MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh"; \
+    else \
+    echo "Unsupported architecture: $arch"; \
+    exit 1; \
+    fi && \
+    wget $MINICONDA_URL -O miniconda.sh && \
+    mkdir -p /root/.conda && \
+    bash miniconda.sh -b -p /root/miniconda3 && \
+    rm -f miniconda.sh
+
+
+# 将 Conda 添加到所有新 shell 的 PATH 中
+ENV PATH=/root/miniconda3/bin/:$PATH
+
+WORKDIR /workspace/
+
+# Download the Diffusion Policy repository, and install with conda
+RUN git clone --recursive https://github.com/huggingface/diffusers.git
+
+WORKDIR /workspace/diffusers
+
+# Accept the Anaconda terms of service
+RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+
+ENV UV_HTTP_TIMEOUT=1200
+
+# pre-install the heavy dependencies (these can later be overridden by the deps from setup.py)
+ RUN python3.10 -m pip install --no-cache-dir --upgrade pip uv==0.1.11 && \
+     python3.10 -m uv pip install --no-cache-dir \
+     torch \
+     torchvision \
+     torchaudio \
+     invisible_watermark && \
+     python3.10 -m pip install --no-cache-dir \
+     accelerate \
+     datasets \
+     hf-doc-builder \
+     huggingface-hub \
+     hf_transfer \
+     Jinja2 \
+     librosa \
+     numpy==1.26.4 \
+     scipy \
+     tensorboard \
+     transformers \
+     pytorch-lightning  \
+     hf_transfer
+
+# 初始化Conda，将conda命令添加到bash的初始化文件中
+RUN /root/miniconda3/bin/conda init bash
+
+RUN  conda create --name diffusers-env python=3.10 -y && \
+    source /root/miniconda3/bin/activate diffusers-env && \
+    conda install -c conda-forge diffusers && \
+    # 清理 conda 缓存以减小镜像体积
+    conda clean -afy
+
+
+
+WORKDIR /workspace/diffusers
+
+# 启动容器并且激活 conda 环境并进入 bash
+CMD ["/bin/bash", "-c", "source /root/miniconda3/bin/activate diffusers-env && echo 'Conda environment [diffusers-env] activated.' && exec /bin/bash"]
